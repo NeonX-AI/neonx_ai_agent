@@ -39,6 +39,9 @@ jobs:
           config_file: client.ovpn
       # Connect to VPN if config provided
 
+      - name: Remove temporary VPN files
+        run: rm -f client.ovpn openvpn.log openvpn.pid
+
       - name: Copy code to server
         uses: appleboy/scp-action@master
         with:
