@@ -5,9 +5,14 @@ services:
     ports:
       - "2222:22"
     restart: unless-stopped
+    volumes:
+      - agent-data:/root/.openclaw
     networks:
       - neonx-network
 
 networks:
   neonx-network:
     external: true
+
+volumes:
+  agent-data:
