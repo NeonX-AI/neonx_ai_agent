@@ -6,9 +6,8 @@ services:
       - "2222:22"
     restart: unless-stopped
     networks:
-          - neonx-network
+      - neonx_network
 
 networks:
-  neonx-network:
-    name: neonx-network
+  neonx_network:
     external: true
