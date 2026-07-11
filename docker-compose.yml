@@ -9,6 +9,7 @@ services:
     tty: true
 
     # command: openclaw gateway
+    command: tail -f /dev/null
 
     volumes:
       - openclaw-data:/home/node
