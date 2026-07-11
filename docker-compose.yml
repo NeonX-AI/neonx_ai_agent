@@ -1,0 +1,7 @@
+services:
+  ubuntu-ssh:
+    build: .
+    container_name: neonx-ubuntu
+    ports:
+      - "2222:22"
+    restart: unless-stopped
