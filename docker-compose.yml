@@ -1,10 +1,18 @@
 services:
-  ubuntu-ssh:
-    build: .
-    container_name: neonx-ubuntu
-    ports:
-      - "2222:22"
+  openclaw:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw
+
     restart: unless-stopped
+
+    stdin_open: true
+    tty: true
+
+    command: openclaw gateway
+
+    volumes:
+      - ./openclaw-data:/home/node
+
     networks:
       - neonx_network
 
