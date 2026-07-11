@@ -1,30 +1,13 @@
 services:
-  openclaw:
-    image: ghcr.io/openclaw/openclaw:latest
+  ubuntu-ssh:
+    build: .
     container_name: neonx_ai_agent
-
-    restart: unless-stopped
-
-    stdin_open: true
-    tty: true
-
-    entrypoint: ["/bin/sh", "/entrypoint.sh"]
-
-    environment:
-      TZ: Asia/Ho_Chi_Minh
-      OPENCLAW_GATEWAY_PASSWORD: "changeme"
-
-    volumes:
-      - openclaw-data:/home/node
-      - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
-      - "18789:18789"
+      - "2222:22"
+    restart: unless-stopped
     networks:
       - neonx-network
 
 networks:
   neonx-network:
     external: true
-
-volumes:
-  openclaw-data:

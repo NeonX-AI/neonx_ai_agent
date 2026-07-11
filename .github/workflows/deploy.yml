@@ -3,8 +3,8 @@ name: NeonX AI Agent Deploy
 on:
   push:
     branches:
-      - "dev"
-      - "main"
+      # - "dev"
+      # - "main"
 
 jobs:
   deploy:
