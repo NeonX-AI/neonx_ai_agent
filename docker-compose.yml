@@ -8,12 +8,13 @@ services:
     stdin_open: true
     tty: true
 
-    # command: openclaw gateway
-    command: tail -f /dev/null
+    command: openclaw gateway
+    # command: tail -f /dev/null
 
     volumes:
       - openclaw-data:/home/node
-
+    ports:
+      - "18789:18789"
     networks:
       - neonx-network
 
