@@ -5,3 +5,10 @@ services:
     ports:
       - "2222:22"
     restart: unless-stopped
+    networks:
+          - neonx-network
+
+    networks:
+      neonx-network:
+        name: neonx-network
+        external: true
