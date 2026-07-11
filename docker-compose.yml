@@ -11,11 +11,14 @@ services:
     command: openclaw gateway
 
     volumes:
-      - ./openclaw-data:/home/node
+      - openclaw-data:/home/node
 
     networks:
-      - neonx_network
+      - neonx-network
 
 networks:
-  neonx_network:
+  neonx-network:
     external: true
+
+volumes:
+  openclaw-data:
