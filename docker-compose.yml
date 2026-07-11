@@ -8,8 +8,8 @@ services:
     stdin_open: true
     tty: true
 
-    command: openclaw gateway
-    # command: tail -f /dev/null
+    # command: openclaw gateway
+    command: tail -f /dev/null # for first time run, to enter the container and run the command manually
 
     volumes:
       - openclaw-data:/home/node
