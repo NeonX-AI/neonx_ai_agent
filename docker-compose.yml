@@ -1,0 +1,13 @@
+services:
+  ubuntu-ssh:
+    build: .
+    container_name: neonx_ai_agent
+    ports:
+      - "2222:22"
+    restart: unless-stopped
+    networks:
+      - neonx-network
+
+networks:
+  neonx-network:
+    external: true
