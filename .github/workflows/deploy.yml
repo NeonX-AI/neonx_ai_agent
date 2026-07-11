@@ -73,5 +73,5 @@ jobs:
             echo "Network found"; \
             fi
 
-            docker compose up -d --build
+            docker compose up -d
             docker image prune -f

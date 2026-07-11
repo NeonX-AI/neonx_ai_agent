@@ -17,21 +17,8 @@ services:
 
     volumes:
       - openclaw-data:/home/node
-    networks:
-      - neonx-network
-
-  nginx:
-    image: nginx:alpine
-    container_name: neonx_ai_agent_nginx
-    restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
-    depends_on:
-      - openclaw
+      - "18789:18789"
     networks:
       - neonx-network
 
