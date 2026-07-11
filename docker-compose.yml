@@ -11,6 +11,10 @@ services:
     # command: openclaw gateway
     command: tail -f /dev/null # for first time run, to enter the container and run the command manually
 
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      OPENCLAW_GATEWAY_PASSWORD: "changeme"
+
     volumes:
       - openclaw-data:/home/node
     ports:
