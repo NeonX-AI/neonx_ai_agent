@@ -1,7 +1,7 @@
 services:
   openclaw:
     image: ghcr.io/openclaw/openclaw:latest
-    container_name: neonx-ai-agent
+    container_name: neonx_ai_agent
 
     restart: unless-stopped
 
