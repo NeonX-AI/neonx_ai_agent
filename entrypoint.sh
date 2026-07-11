@@ -8,4 +8,4 @@ if [ ! -f "$CONFIG" ]; then
     exec tail -f /dev/null
 fi
 
-exec openclaw gateway run
+# exec openclaw gateway run
