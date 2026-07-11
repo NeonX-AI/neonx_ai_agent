@@ -4,6 +4,7 @@ services:
     container_name: neonx_ai_agent
     ports:
       - "2222:22"
+      - "18789:18789"
     restart: unless-stopped
     volumes:
       - agent-data:/root
