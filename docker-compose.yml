@@ -9,6 +9,7 @@ services:
     tty: true
 
     entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    user: "0:0"
 
     environment:
       TZ: Asia/Ho_Chi_Minh
