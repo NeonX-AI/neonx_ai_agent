@@ -2,10 +2,10 @@
 set -eu
 
 CONFIG=/home/node/.openclaw/openclaw.json
-DATA_DIR=/home/node
+# DATA_DIR=/home/node
 
-mkdir -p "$DATA_DIR"
-chmod 755 "$DATA_DIR"
+# mkdir -p "$DATA_DIR"
+# chmod 755 "$DATA_DIR"
 
 if [ ! -f "$CONFIG" ]; then
     echo "Config file not found. Keeping container alive."

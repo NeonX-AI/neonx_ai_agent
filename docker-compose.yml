@@ -18,10 +18,7 @@ services:
 
     volumes:
       - ./agent_data:/home/node/.openclaw
-      - type: bind
-        source: ./entrypoint.sh
-        target: /entrypoint.sh
-        read_only: false
+      - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "18789:18789"
     networks:
