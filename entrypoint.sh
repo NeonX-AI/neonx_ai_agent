@@ -2,7 +2,7 @@
 set -eu
 
 CONFIG=/home/node/.openclaw/openclaw.json
-DATA_DIR=/home/node/.openclaw
+DATA_DIR=/home/node
 
 mkdir -p "$DATA_DIR"
 chmod 755 "$DATA_DIR"
