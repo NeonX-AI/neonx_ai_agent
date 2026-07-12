@@ -5,8 +5,7 @@ CONFIG=/home/node/.openclaw/openclaw.json
 DATA_DIR=/home/node/.openclaw
 
 mkdir -p "$DATA_DIR"
-chown -R 1000:1000 "$DATA_DIR" 2>/dev/null || true
-chmod -R u+rwX,g+rwX,o-rwx "$DATA_DIR" 2>/dev/null || true
+chmod 755 "$DATA_DIR"
 
 if [ ! -f "$CONFIG" ]; then
     echo "Config file not found. Keeping container alive."
@@ -14,6 +13,7 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 if command -v openclaw >/dev/null 2>&1; then
+    export OPENCLAW_HOME="$DATA_DIR"
     exec openclaw gateway run
 fi
 

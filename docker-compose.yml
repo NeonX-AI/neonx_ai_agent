@@ -14,6 +14,7 @@ services:
     environment:
       TZ: Asia/Ho_Chi_Minh
       OPENCLAW_GATEWAY_PASSWORD: "changeme"
+      OPENCLAW_HOME: /home/node/.openclaw
 
     volumes:
       - ./agent_data:/home/node/.openclaw
