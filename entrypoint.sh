@@ -13,9 +13,9 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 if command -v openclaw >/dev/null 2>&1; then
-    export OPENCLAW_HOME="$DATA_DIR"
+    # export OPENCLAW_HOME="$DATA_DIR"
     exec openclaw gateway run
 fi
 
-echo "openclaw binary not found. Keeping container alive."
+echo "Keeping container alive."
 exec tail -f /dev/null

@@ -66,6 +66,10 @@ jobs:
             echo ">>> Move to project directory"
             cd ~/apps/${{ env.SERVICE_NAME }}
 
+            mkdir -p agent_data
+            chmod 755 agent_data
+            chmod -R 755 agent_data
+
             if [[ $(docker network create -d bridge neonx-network) ]]; \
             then \
               echo "Created neonx-network" \
