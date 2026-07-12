@@ -24,5 +24,4 @@ services:
 
 networks:
   neonx-network:
-    name: neonx-network
-    driver: bridge
+    external: true
