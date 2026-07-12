@@ -3,7 +3,7 @@ name: NeonX AI Agent Deploy
 on:
   push:
     branches:
-      # - "dev"
+      - "dev"
       # - "main"
 
 jobs:
@@ -66,12 +66,5 @@ jobs:
             echo ">>> Move to project directory"
             cd ~/apps/${{ env.SERVICE_NAME }}
 
-            if [[ $(docker network create -d bridge neonx-network) ]]; \
-            then \
-            echo "Created neonx-network" \
-            else \
-            echo "Network found"; \
-            fi
-
             docker compose up -d --build
-            docker image prune -f
+            docker image prune -f --filter "until=24h"
