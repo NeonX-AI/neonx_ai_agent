@@ -66,10 +66,10 @@ jobs:
             echo ">>> Move to project directory"
             cd ~/apps/${{ env.SERVICE_NAME }}
 
-            sudo mkdir -p agent_data
-            sudo chown -R $(whoami):$(whoami) agent_data 2>/dev/null || true
-            sudo chmod 755 agent_data 2>/dev/null || true
-            sudo chmod -R 755 agent_data 2>/dev/null || true
+            mkdir -p agent_data
+            chown -R $(whoami):$(whoami) agent_data 2>/dev/null || true
+            chmod 755 agent_data 2>/dev/null || true
+            chmod -R 755 agent_data 2>/dev/null || true
 
             if [[ $(docker network create -d bridge neonx-network) ]]; \
             then \
