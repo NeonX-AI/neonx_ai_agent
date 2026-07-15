@@ -21,6 +21,7 @@ services:
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "18789:18789"
+      - "8001:8001" # For download files from the agent
     networks:
       - neonx-network
 
