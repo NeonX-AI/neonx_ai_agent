@@ -26,11 +26,15 @@ PLUGIN_DST="/home/node/.openclaw/workspace/luna-middleware"
 PLUGIN_ID="luna-security-middleware"
 
 if [ -d "$PLUGIN_SRC" ]; then
-    echo "Luna middleware source found — copying to workspace..."
-    rm -rf "$PLUGIN_DST"
-    cp -r "$PLUGIN_SRC" "$PLUGIN_DST"
+    echo "Luna middleware source found — preparing workspace copy..."
+    if [ -d "$PLUGIN_DST" ]; then
+        echo "Plugin destination already exists; reusing mounted files."
+    else
+        mkdir -p "$(dirname "$PLUGIN_DST")"
+        cp -r "$PLUGIN_SRC" "$PLUGIN_DST"
+    fi
     chown -R root:root "$PLUGIN_DST" 2>/dev/null || true
-    echo "Plugin copied, ownership set to root."
+    echo "Plugin ready at $PLUGIN_DST."
 fi
 
 if [ -d "$PLUGIN_DST" ]; then
