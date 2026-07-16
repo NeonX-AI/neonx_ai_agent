@@ -20,10 +20,21 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 # Auto-configure Luna Security Middleware plugin
-PLUGIN_PATH="/home/node/.openclaw/workspace/luna-middleware"
+# Copy plugin from repo to workspace (so ownership becomes root)
+PLUGIN_SRC="/home/node/.openclaw/workspace/neonx_ai_agent/luna-middleware"
+PLUGIN_DST="/home/node/.openclaw/workspace/luna-middleware"
 PLUGIN_ID="luna-security-middleware"
-if [ -d "$PLUGIN_PATH" ]; then
-    echo "Luna middleware found — auto-configuring plugin..."
+
+if [ -d "$PLUGIN_SRC" ]; then
+    echo "Luna middleware source found — copying to workspace..."
+    rm -rf "$PLUGIN_DST"
+    cp -r "$PLUGIN_SRC" "$PLUGIN_DST"
+    chown -R root:root "$PLUGIN_DST" 2>/dev/null || true
+    echo "Plugin copied, ownership set to root."
+fi
+
+if [ -d "$PLUGIN_DST" ]; then
+    echo "Luna middleware installed — auto-configuring plugin..."
     python3 -c "
 import json, sys
 with open('$CONFIG', 'r') as f:
@@ -34,8 +45,8 @@ if 'load' not in cfg['plugins']:
     cfg['plugins']['load'] = {}
 if 'paths' not in cfg['plugins']['load']:
     cfg['plugins']['load']['paths'] = []
-if '$PLUGIN_PATH' not in cfg['plugins']['load']['paths']:
-    cfg['plugins']['load']['paths'].append('$PLUGIN_PATH')
+if '$PLUGIN_DST' not in cfg['plugins']['load']['paths']:
+    cfg['plugins']['load']['paths'].append('$PLUGIN_DST')
 if 'allow' not in cfg['plugins']:
     cfg['plugins']['allow'] = []
 if '$PLUGIN_ID' not in cfg['plugins']['allow']:
