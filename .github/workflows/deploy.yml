@@ -74,10 +74,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: |
-            docker-compose.yml
-            entrypoint.sh
-            openclaw-message-listener/dist/**
+          source: "docker-compose.yml,entrypoint.sh,openclaw-message-listener/dist"
           target: "~/apps/${{ env.SERVICE_NAME }}"
 
       - name: Deploy
