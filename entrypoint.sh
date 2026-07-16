@@ -21,6 +21,7 @@ fi
 
 # Auto-configure Luna Security Middleware plugin
 PLUGIN_PATH="/home/node/.openclaw/workspace/luna-middleware"
+PLUGIN_ID="luna-security-middleware"
 if [ -d "$PLUGIN_PATH" ]; then
     echo "Luna middleware found — auto-configuring plugin..."
     python3 -c "
@@ -35,6 +36,10 @@ if 'paths' not in cfg['plugins']['load']:
     cfg['plugins']['load']['paths'] = []
 if '$PLUGIN_PATH' not in cfg['plugins']['load']['paths']:
     cfg['plugins']['load']['paths'].append('$PLUGIN_PATH')
+if 'allow' not in cfg['plugins']:
+    cfg['plugins']['allow'] = []
+if '$PLUGIN_ID' not in cfg['plugins']['allow']:
+    cfg['plugins']['allow'].append('$PLUGIN_ID')
 with open('$CONFIG', 'w') as f:
     json.dump(cfg, f, indent=2)
 print('Plugin config injected.')
