@@ -33,7 +33,10 @@ if [ -d "$PLUGIN_SRC" ]; then
         mkdir -p "$(dirname "$PLUGIN_DST")"
         cp -r "$PLUGIN_SRC" "$PLUGIN_DST"
     fi
+    mkdir -p "$(dirname "$PLUGIN_DST")"
     chown -R root:root "$PLUGIN_DST" 2>/dev/null || true
+    chown root:root "$(dirname "$PLUGIN_DST")" 2>/dev/null || true
+    chmod -R u+rwX,go+rX "$PLUGIN_DST" 2>/dev/null || true
     echo "Plugin ready at $PLUGIN_DST."
 fi
 
