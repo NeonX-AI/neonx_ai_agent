@@ -21,19 +21,6 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# # Check prerequisites
-# if ! command_exists docker; then
-#     echo "Error: Docker is not installed or not in PATH"
-#     if [[ "$OS_TYPE" == *"darwin"* ]]; then
-#         echo "On macOS, install Docker Desktop from: https://www.docker.com/products/docker-desktop"
-#     elif [[ "$OS_TYPE" == *"linux"* ]]; then
-#         echo "On Ubuntu, install Docker with:"
-#         echo "  curl -fsSL https://get.docker.com -o get-docker.sh"
-#         echo "  sudo sh get-docker.sh"
-#     fi
-#     exit 1
-# fi
-
 if ! command_exists docker-compose; then
     echo "Warning: docker-compose not found"
     if ! command_exists docker compose; then
