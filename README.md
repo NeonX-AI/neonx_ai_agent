@@ -1,0 +1,1 @@
+bash build-and-run.sh

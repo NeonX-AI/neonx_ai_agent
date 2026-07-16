@@ -2,8 +2,12 @@
   "name": "openclaw-message-listener",
   "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "build": "tsc && cp openclaw.plugin.json dist/",
+    "dev": "tsc --watch"
+  },
   "openclaw": {
-    "extensions": ["./src/index.js"],
+    "extensions": ["./dist/index.js"],
     "hooks": {
       "allowConversationAccess": true
     },
@@ -11,6 +15,9 @@
       "pluginApi": ">=2026.3.24-beta.2",
       "minGatewayVersion": "2026.3.24-beta.2"
     }
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
   },
   "dependencies": {}
 }
