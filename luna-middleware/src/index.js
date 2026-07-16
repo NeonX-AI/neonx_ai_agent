@@ -79,11 +79,38 @@ function detectLang(text) {
   return "en";
 }
 
+function normalizeText(text) {
+  return String(text || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractMessageText(messages) {
+  if (!Array.isArray(messages)) return "";
+
+  return messages
+    .map((message) => {
+      const content = message?.content;
+      if (typeof content === "string") return content;
+      if (Array.isArray(content)) {
+        return content
+          .map((item) => (typeof item === "string" ? item : item?.text || ""))
+          .filter(Boolean)
+          .join(" ");
+      }
+      if (content && typeof content === "object") return content.text || "";
+      return "";
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
 function checkSensitive(text) {
-  if (!text) return false;
-  for (const p of SENSITIVE_PATTERNS) {
-    const re = new RegExp(p.source, p.flags);
-    if (re.test(text)) return true;
+  const normalized = normalizeText(text);
+  if (!normalized) return false;
+
+  for (const pattern of SENSITIVE_PATTERNS) {
+    if (pattern.test(normalized)) return true;
   }
   return false;
 }
@@ -120,9 +147,9 @@ export default definePluginEntry({
 
       // Check messages for sensitive patterns
       const messages = event?.messages || [];
-      const systemMsg = messages.find((m) => m?.role === "system")?.content || "";
-      const userMsgs = messages.filter((m) => m?.role === "user").map((m) => m.content || "").join(" ");
-      const allInput = systemMsg + " " + userMsgs;
+      const systemMsg = extractMessageText(messages.filter((m) => m?.role === "system"));
+      const userMsgs = extractMessageText(messages.filter((m) => m?.role === "user"));
+      const allInput = [systemMsg, userMsgs].filter(Boolean).join("\n");
 
       console.log(`[luna-middleware] before_agent_run: session=${sessionKey}, messages=${messages.length}`);
 
