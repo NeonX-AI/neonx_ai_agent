@@ -66,12 +66,5 @@ jobs:
             echo ">>> Move to project directory"
             cd ~/apps/${{ env.SERVICE_NAME }}
 
-            if [[ $(docker network create -d bridge neonx-network) ]]; \
-            then \
-              echo "Created neonx-network" \
-            else \
-              echo "Network found"; \
-            fi
-
-            docker compose up -d --force-recreate
+            bash build-and-run.sh
             docker image prune -f --filter "until=24h"
