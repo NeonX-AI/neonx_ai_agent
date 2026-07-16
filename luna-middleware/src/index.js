@@ -2,10 +2,26 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 
 // ============================================================
 // LUNA SECURITY MIDDLEWARE — OpenClaw Plugin
-// Hook vào pipeline: filter input + filter output cho Luna agent
+// Hook vào pipeline: filter input + filter output cho TẤT CẢ agent (trừ main)
 // ============================================================
 
-const BYPASS_USER_IDS = new Set(["2088229709"]);
+// Configurable bypass user IDs — lấy từ env var, fallback vào hardcode
+const BYPASS_USER_IDS = new Set(
+  (process.env.OWNER_BYPASS_IDS || "2088229709")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+);
+
+// Agent cần bảo mật: TẤT CẢ trừ main agent
+const PROTECTED_AGENTS = ["shop-quan-ao"]; // có thể thêm agent khác
+
+function isProtectedAgent(sessionKey) {
+  if (!sessionKey) return false;
+  // Block tất cả agent ngoài "main"
+  if (sessionKey.includes("agent:main:")) return false;
+  return true;
+}
 
 const SENSITIVE_PATTERNS = [
   // AI model / agent
@@ -93,14 +109,18 @@ export default definePluginEntry({
   description: "Blocks sensitive patterns for Luna agent, filters output to redact technical info",
 
   register(api) {
-    // Hook: Block input before agent run (cho Luna)
+    // Hook: Block input before agent run
+    // Áp dụng cho TẤT CẢ agent TRỪ main agent
     api.on("before_agent_run", async (event) => {
-      // Chỉ áp dụng cho Luna agent
-      if (!event.context?.sessionKey?.includes("shop-quan-ao")) return;
+      const sessionKey = event.context?.sessionKey || "";
+
+      // Bỏ qua main agent — không chặn
+      if (!isProtectedAgent(sessionKey)) return;
 
       const userMsg = event.messages?.filter((m) => m.role === "user")?.pop()?.content || "";
       const userId = event.context?.userId || event.context?.userIdStr || "";
 
+      // Owner bypass — chat thoải mái
       const filter = filterInput(userMsg, userId);
 
       if (!filter.allowed) {
@@ -111,10 +131,13 @@ export default definePluginEntry({
       }
     }, { priority: 100 });
 
-    // Hook: Filter output before sending (cho Luna)
+    // Hook: Filter output before sending
+    // Áp dụng cho TẤT CẢ agent TRỪ main agent
     api.on("message_sending", async (event) => {
-      // Chỉ áp dụng cho Luna agent
-      if (!event.context?.sessionKey?.includes("shop-quan-ao")) return;
+      const sessionKey = event.context?.sessionKey || "";
+
+      // Bỏ qua main agent — không filter
+      if (!isProtectedAgent(sessionKey)) return;
 
       const text = event.payload?.text || "";
       if (!text) return;
