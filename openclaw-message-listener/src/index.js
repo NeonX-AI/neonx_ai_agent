@@ -12,21 +12,25 @@ export default definePluginEntry({
       const userId = event?.context?.userId || "unknown";
       const agentId = event?.context?.agentId || "unknown";
       const messages = event?.messages || [];
+
+      // console.log(`[openclaw-message-listener] event message:`, event);
       
       // Extract the latest user message
-      const userMessages = messages.filter((m) => m?.role === "user");
-      const latestUserMessage = userMessages.length > 0 
-        ? (typeof userMessages[userMessages.length - 1]?.content === "string" 
-          ? userMessages[userMessages.length - 1].content 
-          : "") 
-        : "";
+      // const userMessages = messages.filter((m) => m?.role === "user");
+      
+      // const latestUserMessage = userMessages.length > 0 
+      //   ? (typeof userMessages[userMessages.length - 1]?.content === "string" 
+      //     ? userMessages[userMessages.length - 1].content 
+      //     : "") 
+      //   : "";
+      const prompt = event.prompt;
 
       console.log(`[openclaw-message-listener] Incoming message:`, {
         timestamp: new Date().toISOString(),
         sessionKey,
         userId,
         agentId,
-        message: latestUserMessage.substring(0, 200) + (latestUserMessage.length > 200 ? "..." : ""), // Truncate long messages
+        message: prompt.substring(0, 200) + (prompt.length > 200 ? "..." : ""), // Truncate long messages
         totalMessages: messages.length,
       });
     }, { priority: 100 }); // Higher priority to block before other middleware
