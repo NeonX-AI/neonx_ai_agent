@@ -59,6 +59,14 @@ jobs:
           cd openclaw-message-listener
           npm run build
 
+      - name: Verify build output
+        run: |
+          cd openclaw-message-listener
+          ls -la dist/
+          test -f dist/index.js && echo "Main JS file exists"
+          test -f dist/index.d.ts && echo "Type definition exists"
+          test -f dist/openclaw.plugin.json && echo "Plugin config exists"
+
       - name: Copy code to server
         uses: appleboy/scp-action@master
         with:
