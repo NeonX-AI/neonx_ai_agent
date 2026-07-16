@@ -5,13 +5,18 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 // Hook vào pipeline: filter input + filter output cho TẤT CẢ agent (trừ main)
 // ============================================================
 
-// Configurable bypass user IDs — lấy từ env var, fallback vào hardcode
+// Configurable bypass user IDs — BẮT BUỘC set env var OWNER_BYPASS_IDS
+// Không hardcode — mỗi môi trường có ID khác nhau
 const BYPASS_USER_IDS = new Set(
-  (process.env.OWNER_BYPASS_IDS || "2088229709")
+  (process.env.OWNER_BYPASS_IDS || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean)
 );
+
+if (BYPASS_USER_IDS.size === 0) {
+  console.warn("[luna-middleware] WARNING: OWNER_BYPASS_IDS not set — no bypass users. Set env var OWNER_BYPASS_IDS to allow owner access.");
+}
 
 function isProtectedAgent(sessionKey) {
   if (!sessionKey) return false;

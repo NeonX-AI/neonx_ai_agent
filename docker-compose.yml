@@ -17,7 +17,7 @@ services:
       - ./luna-middleware:/home/node/.openclaw/workspace/luna-middleware:ro
     environment:
       TZ: Asia/Ho_Chi_Minh
-      OWNER_BYPASS_IDS: "2088229709"
+      OWNER_BYPASS_IDS: "${OWNER_BYPASS_IDS}"
       OPENCLAW_GATEWAY_PASSWORD: "changeme"
       OPENCLAW_HOME: /home/node
 
