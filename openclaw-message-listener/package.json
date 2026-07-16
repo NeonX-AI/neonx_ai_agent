@@ -1,5 +1,5 @@
 {
-  "name": "luna-security-middleware",
+  "name": "openclaw-message-listener",
   "version": "1.0.0",
   "type": "module",
   "openclaw": {
