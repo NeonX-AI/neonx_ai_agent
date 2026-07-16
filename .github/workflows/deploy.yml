@@ -59,28 +59,18 @@ jobs:
           cd openclaw-message-listener
           npm run build
 
-      - name: Copy code to server (excluding dist)
+      - name: Copy code to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "."
+          source: |
+            docker-compose.yml
+            entrypoint.sh
+            openclaw-message-listener/dist/**
           target: "~/apps/${{ env.SERVICE_NAME }}"
-          exclude: 
-            - "openclaw-message-listener/dist/**"
-
-      - name: Copy built files separately with proper permissions
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          port: ${{ secrets.SSH_PORT }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          source: "openclaw-message-listener/dist/"
-          target: "~/apps/${{ env.SERVICE_NAME }}/openclaw-message-listener/"
-          strip_components: 1
 
       - name: Deploy
         uses: appleboy/ssh-action@master
