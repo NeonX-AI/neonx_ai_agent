@@ -1,0 +1,12 @@
+{
+  "id": "luna-security-middleware",
+  "name": "Luna Security Middleware",
+  "description": "Blocks sensitive patterns for Luna agent, filters output to redact technical info",
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false
+  }
+}
