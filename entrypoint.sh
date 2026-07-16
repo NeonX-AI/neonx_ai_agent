@@ -51,6 +51,13 @@ if 'allow' not in cfg['plugins']:
     cfg['plugins']['allow'] = []
 if '$PLUGIN_ID' not in cfg['plugins']['allow']:
     cfg['plugins']['allow'].append('$PLUGIN_ID')
+if 'entries' not in cfg['plugins']:
+    cfg['plugins']['entries'] = {}
+if '$PLUGIN_ID' not in cfg['plugins']['entries']:
+    cfg['plugins']['entries']['$PLUGIN_ID'] = {}
+if 'hooks' not in cfg['plugins']['entries']['$PLUGIN_ID']:
+    cfg['plugins']['entries']['$PLUGIN_ID']['hooks'] = {}
+cfg['plugins']['entries']['$PLUGIN_ID']['hooks']['allowConversationAccess'] = True
 with open('$CONFIG', 'w') as f:
     json.dump(cfg, f, indent=2)
 print('Plugin config injected.')
