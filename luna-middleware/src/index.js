@@ -13,9 +13,6 @@ const BYPASS_USER_IDS = new Set(
     .filter(Boolean)
 );
 
-// Agent cần bảo mật: TẤT CẢ trừ main agent
-const PROTECTED_AGENTS = ["shop-quan-ao"]; // có thể thêm agent khác
-
 function isProtectedAgent(sessionKey) {
   if (!sessionKey) return false;
   // Block tất cả agent ngoài "main"
