@@ -20,24 +20,16 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 # Auto-configure Luna Security Middleware plugin
-# Copy plugin from repo to workspace (so ownership becomes root)
 PLUGIN_SRC="/home/node/.openclaw/workspace/neonx_ai_agent/luna-middleware"
 PLUGIN_DST="/home/node/.openclaw/workspace/luna-middleware"
 PLUGIN_ID="luna-security-middleware"
 
 if [ -d "$PLUGIN_SRC" ]; then
-    echo "Luna middleware source found — preparing workspace copy..."
-    if [ -d "$PLUGIN_DST" ]; then
-        echo "Plugin destination already exists; reusing mounted files."
-    else
-        mkdir -p "$(dirname "$PLUGIN_DST")"
-        cp -r "$PLUGIN_SRC" "$PLUGIN_DST"
-    fi
-    mkdir -p "$(dirname "$PLUGIN_DST")"
+    echo "Luna middleware source found — ensuring plugin path exists..."
+    mkdir -p "$PLUGIN_DST"
     chown -R root:root "$PLUGIN_DST" 2>/dev/null || true
-    chown root:root "$(dirname "$PLUGIN_DST")" 2>/dev/null || true
     chmod -R u+rwX,go+rX "$PLUGIN_DST" 2>/dev/null || true
-    echo "Plugin ready at $PLUGIN_DST."
+    echo "Plugin path ready at $PLUGIN_DST."
 fi
 
 if [ -d "$PLUGIN_DST" ]; then
