@@ -1,10 +1,10 @@
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 
 // ============================================================
-// LUNA SECURITY MIDDLEWARE — OpenClaw Plugin (v2)
-// Hook: llm_input (observation) + message_sending (decision)
-// Không cần allowConversationAccess
-// Hỗ trợ đa ngôn ngữ (EN, VI, ZH)
+// LUNA SECURITY MIDDLEWARE — OpenClaw Plugin (v3)
+// Hooks: message_received (observation) + message_sending (decision)
+// Không cần allowConversationAccess (message hooks không cần permission)
+// Hỗ trợ đa ngôn ngữ: VI, EN, ZH
 // ============================================================
 
 const BYPASS_USER_IDS = new Set(
@@ -24,7 +24,7 @@ function isProtectedAgent(sessionKey) {
   return true;
 }
 
-// Multi-language sensitive patterns (EN, VI, ZH)
+// Multi-language sensitive patterns
 const SENSITIVE_PATTERNS = [
   // AI model / agent
   /(\bmodel\b|\bllm\b|\bagent|\bai\b|\bgpt\b|\bclaude\b|\bgemini\b|\bqwen\b)/i,
@@ -58,15 +58,25 @@ const SENSITIVE_PATTERNS = [
   /(session[_\s]?id|pid|runtime|process[_\s]?id)/i,
 ];
 
-const REDACT_PATTERNS = [
-  { pattern: /(api[_\s]?key|token|secret)\s*[:=]\s*\S+/gi, replacement: "$1: [REDACTED]" },
-  { pattern: /\/home\/node\/\.openclaw[^\s]*/gi, replacement: "[REDACTED_PATH]" },
-  { pattern: /(session[_\s]?id)\s*[:=]\s*\S+/gi, replacement: "$1: [REDACTED]" },
-  { pattern: /openclaw\.json/gi, replacement: "[REDACTED_CONFIG]" },
-  { pattern: /sk-[a-zA-Z0-9]{10,}/g, replacement: "[REDACTED_KEY]" },
-  { pattern: /ghp_[a-zA-Z0-9]{10,}/g, replacement: "[REDACTED_TOKEN]" },
-  { pattern: /(base[_]?url|endpoint)\s*[:=]\s*https?:\/\/\S+/gi, replacement: "$1: [REDACTED]" },
-];
+// Language detection
+const VI_CHARS = /[àáạảãăằắặẳẵôốồổỗơờớợưứừửữéèẹẻêếềệíìịỉĩýỳỵỷỹđ]/;
+const ZH_CHARS = /[\u4e00-\u9fff]/;
+
+function detectLang(text) {
+  if (!text) return "en";
+  if (ZH_CHARS.test(text)) return "zh";
+  if (VI_CHARS.test(text)) return "vi";
+  return "en";
+}
+
+function checkSensitive(text) {
+  if (!text) return false;
+  for (const p of SENSITIVE_PATTERNS) {
+    const re = new RegExp(p.source, p.flags);
+    if (re.test(text)) return true;
+  }
+  return false;
+}
 
 const BLOCK_RESPONSES = {
   vi: [
@@ -85,46 +95,36 @@ const BLOCK_RESPONSES = {
   ],
 };
 
-const VI_CHARS = /[àáạảãăằắặẳẵôốồổỗơờớợưứừửữéèẹẻêếềệíìịỉĩýỳỵỷỹđ]/;
-const ZH_CHARS = /[\u4e00-\u9fff]/;
-
-function detectLang(text) {
-  if (!text) return "en";
-  if (ZH_CHARS.test(text)) return "zh";
-  if (VI_CHARS.test(text)) return "vi";
-  return "en";
-}
-
-function containsSensitive(text) {
-  if (!text) return false;
-  for (const p of SENSITIVE_PATTERNS) {
-    const re = new RegExp(p.source, p.flags);
-    if (re.test(text)) return true;
-  }
-  return false;
-}
+const REDACT_PATTERNS = [
+  { re: /(api[_\s]?key|token|secret)\s*[:=]\s*\S+/gi, rep: "$1: [REDACTED]" },
+  { re: /\/home\/node\/\.openclaw[^\s]*/gi, rep: "[REDACTED_PATH]" },
+  { re: /(session[_\s]?id)\s*[:=]\s*\S+/gi, rep: "$1: [REDACTED]" },
+  { re: /openclaw\.json/gi, rep: "[REDACTED_CONFIG]" },
+  { re: /sk-[a-zA-Z0-9]{10,}/g, rep: "[REDACTED_KEY]" },
+  { re: /ghp_[a-zA-Z0-9]{10,}/g, rep: "[REDACTED_TOKEN]" },
+  { re: /(base[_]?url|endpoint)\s*[:=]\s*https?:\/\/\S+/gi, rep: "$1: [REDACTED]" },
+];
 
 function filterOutput(text) {
   let result = text;
   let changed = false;
-  for (const { pattern, replacement } of REDACT_PATTERNS) {
-    const re = new RegExp(pattern.source, pattern.flags);
-    if (re.test(result)) {
-      result = result.replace(re, replacement);
+  for (const { re, rep } of REDACT_PATTERNS) {
+    const newResult = result.replace(re, rep);
+    if (newResult !== result) {
+      result = newResult;
       changed = true;
     }
   }
   return { text: result, changed };
 }
 
-function getBlockResponse(text) {
-  const lang = detectLang(text);
+function getBlockResponse(lang) {
   const pool = BLOCK_RESPONSES[lang] || BLOCK_RESPONSES.en;
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// Track blocked sessions: sessionKey -> { blocked: true, lang }
-const blockedSessions = new Map();
+// Track: sessionKey -> { blocked: boolean, lang: string }
+const sessionFlags = new Map();
 
 export default definePluginEntry({
   id: "luna-security-middleware",
@@ -132,61 +132,81 @@ export default definePluginEntry({
   description: "Blocks sensitive patterns for non-main agents, multi-language support",
 
   register(api) {
-    // Hook 1: llm_input (observation) — detect sensitive input
-    // No allowConversationAccess needed for observation hooks
-    api.on("llm_input", async (event) => {
-      const sessionKey = event.context?.sessionKey || "";
-      if (!isProtectedAgent(sessionKey)) return;
-
-      const userId = event.context?.userId || event.context?.userIdStr || "";
-      if (userId && BYPASS_USER_IDS.has(String(userId))) return;
-
-      const prompt = event.prompt || "";
-      const systemPrompt = event.systemPrompt || "";
-      const fullInput = (systemPrompt || "") + " " + (prompt || "");
-
-      if (containsSensitive(fullInput) || containsSensitive(prompt)) {
-        blockedSessions.set(sessionKey, {
-          blocked: true,
-          lang: detectLang(prompt),
-        });
-        console.log(`[luna-middleware] BLOCKED input detected for session: ${sessionKey}`);
-      } else {
-        blockedSessions.set(sessionKey, { blocked: false });
-      }
-    }, { priority: 100 });
-
-    // Hook 2: message_sending — replace blocked messages with safety response
-    api.on("message_sending", async (event) => {
-      const sessionKey = event.context?.sessionKey || "";
-      if (!isProtectedAgent(sessionKey)) return;
-
-      const flag = blockedSessions.get(sessionKey);
-      const text = event.payload?.text || event.payload?.content || "";
-
-      if (flag?.blocked) {
-        const blockText = getBlockResponse(flag.lang);
-        if (event.payload?.text !== undefined) {
-          event.payload.text = blockText;
-        } else if (event.payload?.content !== undefined) {
-          event.payload.content = blockText;
-        }
-        console.log(`[luna-middleware] Replaced blocked reply for session: ${sessionKey}`);
-        blockedSessions.delete(sessionKey);
+    // Hook 1: message_received (observation, no permission needed)
+    // Gets inbound user messages with sessionKey, senderId
+    api.on("message_received", async (event, ctx) => {
+      const sessionKey = ctx?.sessionKey || event?.context?.sessionKey || "";
+      if (!isProtectedAgent(sessionKey)) {
+        console.log(`[luna-middleware] SKIP (main agent): ${sessionKey}`);
         return;
       }
 
-      // Even if not blocked, redact sensitive info from output
-      if (text) {
-        const { text: sanitized, changed } = filterOutput(text);
+      const senderId = ctx?.senderId || ctx?.channelContext?.sender?.id || event?.context?.senderId || "";
+      if (senderId && BYPASS_USER_IDS.has(String(senderId))) {
+        console.log(`[luna-middleware] BYPASS (owner): sender=${senderId}`);
+        return;
+      }
+
+      const content = event?.content || event?.text || event?.BodyForAgent || event?.body || "";
+      console.log(`[luna-middleware] CHECKING: session=${sessionKey}, sender=${senderId}, len=${content.length}`);
+
+      if (checkSensitive(content)) {
+        sessionFlags.set(sessionKey, { blocked: true, lang: detectLang(content) });
+        console.log(`[luna-middleware] BLOCKED: session=${sessionKey}, lang=${detectLang(content)}`);
+      } else {
+        sessionFlags.set(sessionKey, { blocked: false });
+      }
+    });
+
+    // Hook 2: message_sending (decision, can rewrite or cancel)
+    api.on("message_sending", async (event, ctx) => {
+      const sessionKey = ctx?.sessionKey || event?.context?.sessionKey || "";
+      if (!isProtectedAgent(sessionKey)) return;
+
+      const flag = sessionFlags.get(sessionKey);
+      const content = event?.content || event?.payload?.text || event?.payload?.content || "";
+
+      console.log(`[luna-middleware] message_sending: session=${sessionKey}, blocked=${flag?.blocked}, content_len=${content.length}`);
+
+      if (flag?.blocked && content) {
+        const blockText = getBlockResponse(flag.lang);
+        // message_sending rewrites event.content
+        if (event.content !== undefined) {
+          event.content = blockText;
+        } else if (event.payload?.text !== undefined) {
+          event.payload.text = blockText;
+        } else if (event.payload?.content !== undefined) {
+          event.payload.content = blockText;
+        } else {
+          // Try setting content directly on event
+          event.content = blockText;
+        }
+        console.log(`[luna-middleware] REPLACED with block response for session=${sessionKey}`);
+        sessionFlags.delete(sessionKey);
+        return;
+      }
+
+      // Redact sensitive info from normal output
+      if (content) {
+        const { text: sanitized, changed } = filterOutput(content);
         if (changed) {
-          if (event.payload?.text !== undefined) {
+          if (event.content !== undefined) {
+            event.content = sanitized;
+          } else if (event.payload?.text !== undefined) {
             event.payload.text = sanitized;
           } else if (event.payload?.content !== undefined) {
             event.payload.content = sanitized;
+          } else {
+            event.content = sanitized;
           }
+          console.log(`[luna-middleware] REDACTED output for session=${sessionKey}`);
         }
       }
-    }, { priority: 100 });
+
+      // Clean up flag if it existed but wasn't blocked
+      if (flag !== undefined) {
+        sessionFlags.delete(sessionKey);
+      }
+    });
   },
 });
