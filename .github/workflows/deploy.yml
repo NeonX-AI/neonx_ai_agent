@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "dev"
-      # - "main"
+      - "main"
 
 jobs:
   deploy:
@@ -66,5 +66,12 @@ jobs:
             echo ">>> Move to project directory"
             cd ~/apps/${{ env.SERVICE_NAME }}
 
-            docker compose up -d --build
+            if [[ $(docker network create -d bridge neonx-network) ]]; \
+            then \
+              echo "Created neonx-network" \
+            else \
+              echo "Network found"; \
+            fi
+
+            docker compose up -d --force-recreate
             docker image prune -f --filter "until=24h"

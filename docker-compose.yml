@@ -9,20 +9,22 @@ services:
     tty: true
 
     entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    user: "0:0"
 
     environment:
       TZ: Asia/Ho_Chi_Minh
       OPENCLAW_GATEWAY_PASSWORD: "changeme"
+      OPENCLAW_HOME: /home/node
 
     volumes:
       - ./agent_data:/home/node/.openclaw
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "18789:18789"
+      - "8001:8001" # For download files from the agent
     networks:
       - neonx-network
 
 networks:
   neonx-network:
-    name: neonx-network
-    driver: bridge
+    external: true
