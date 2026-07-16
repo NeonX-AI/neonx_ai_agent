@@ -2,6 +2,10 @@
 set -eu
 
 CONFIG=/home/node/.openclaw/openclaw.json
+PLUGIN_ID="luna-security-middleware"
+PLUGIN_SRC="/home/node/.openclaw/workspace/luna-middleware"
+PLUGIN_FALLBACK="/home/node/.openclaw/workspace/neonx_ai_agent/luna-middleware"
+PLUGIN_DST="/home/node/.openclaw/workspace/luna-middleware"
 
 if ! command -v nano >/dev/null 2>&1; then
     if command -v apt-get >/dev/null 2>&1; then
@@ -19,50 +23,49 @@ if [ ! -f "$CONFIG" ]; then
     exec tail -f /dev/null
 fi
 
-# Auto-configure Luna Security Middleware plugin
-PLUGIN_SRC="/home/node/.openclaw/workspace/neonx_ai_agent/luna-middleware"
-PLUGIN_DST="/home/node/.openclaw/workspace/luna-middleware"
-PLUGIN_ID="luna-security-middleware"
-
 if [ -d "$PLUGIN_SRC" ]; then
-    echo "Luna middleware source found — ensuring plugin path exists..."
-    mkdir -p "$PLUGIN_DST"
-    chown -R root:root "$PLUGIN_DST" 2>/dev/null || true
-    chmod -R u+rwX,go+rX "$PLUGIN_DST" 2>/dev/null || true
-    echo "Plugin path ready at $PLUGIN_DST."
+    echo "Found Luna middleware at $PLUGIN_SRC"
+elif [ -d "$PLUGIN_FALLBACK" ]; then
+    PLUGIN_SRC="$PLUGIN_FALLBACK"
+    echo "Found Luna middleware at $PLUGIN_FALLBACK"
+else
+    echo "Luna middleware not found; skipping plugin auto-load"
 fi
 
-if [ -d "$PLUGIN_DST" ]; then
-    echo "Luna middleware installed — auto-configuring plugin..."
-    python3 -c "
+if [ -d "$PLUGIN_SRC" ]; then
+    echo "Preparing plugin in workspace..."
+    rm -rf "$PLUGIN_DST"
+    mkdir -p "$PLUGIN_DST"
+    cp -r "$PLUGIN_SRC"/. "$PLUGIN_DST"/
+    chown -R root:root "$PLUGIN_DST" 2>/dev/null || true
+    chmod -R u+rwX,go+rX "$PLUGIN_DST" 2>/dev/null || true
+
+    python3 - "$CONFIG" "$PLUGIN_DST" "$PLUGIN_ID" <<'PY'
 import json, sys
-with open('$CONFIG', 'r') as f:
-    cfg = json.load(f)
-if 'plugins' not in cfg:
-    cfg['plugins'] = {}
-if 'load' not in cfg['plugins']:
-    cfg['plugins']['load'] = {}
-if 'paths' not in cfg['plugins']['load']:
-    cfg['plugins']['load']['paths'] = []
-if '$PLUGIN_DST' not in cfg['plugins']['load']['paths']:
-    cfg['plugins']['load']['paths'].append('$PLUGIN_DST')
-if 'allow' not in cfg['plugins']:
-    cfg['plugins']['allow'] = []
-if '$PLUGIN_ID' not in cfg['plugins']['allow']:
-    cfg['plugins']['allow'].append('$PLUGIN_ID')
-if 'entries' not in cfg['plugins']:
-    cfg['plugins']['entries'] = {}
-if '$PLUGIN_ID' not in cfg['plugins']['entries']:
-    cfg['plugins']['entries']['$PLUGIN_ID'] = {}
-if 'hooks' not in cfg['plugins']['entries']['$PLUGIN_ID']:
-    cfg['plugins']['entries']['$PLUGIN_ID']['hooks'] = {}
-cfg['plugins']['entries']['$PLUGIN_ID']['hooks']['allowConversationAccess'] = True
-with open('$CONFIG', 'w') as f:
-    json.dump(cfg, f, indent=2)
-print('Plugin config injected.')
-" 2>/dev/null || echo "Failed to inject plugin config (python3 not available)"
-else
-    echo "Luna middleware not found — skipping plugin auto-config"
+config_path, plugin_path, plugin_id = sys.argv[1:]
+with open(config_path, "r") as fh:
+    cfg = json.load(fh)
+
+cfg.setdefault("plugins", {})
+cfg["plugins"].setdefault("load", {})
+cfg["plugins"]["load"].setdefault("paths", [])
+if plugin_path not in cfg["plugins"]["load"]["paths"]:
+    cfg["plugins"]["load"]["paths"].append(plugin_path)
+
+cfg["plugins"].setdefault("allow", [])
+if plugin_id not in cfg["plugins"]["allow"]:
+    cfg["plugins"]["allow"].append(plugin_id)
+
+cfg["plugins"].setdefault("entries", {})
+cfg["plugins"]["entries"].setdefault(plugin_id, {})
+cfg["plugins"]["entries"][plugin_id].setdefault("hooks", {})
+cfg["plugins"]["entries"][plugin_id]["hooks"]["allowConversationAccess"] = True
+
+with open(config_path, "w") as fh:
+    json.dump(cfg, fh, indent=2)
+PY
+
+    echo "Plugin config injected."
 fi
 
 if command -v openclaw >/dev/null 2>&1; then
