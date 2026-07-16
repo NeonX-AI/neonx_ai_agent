@@ -14,10 +14,41 @@ const BYPASS_USER_IDS = new Set(
     .filter(Boolean)
 );
 
-function isProtectedAgent(sessionKey) {
-  if (!sessionKey) return false;
-  if (sessionKey.includes("agent:main:")) return false;
-  return true;
+function getAgentReference(context = {}) {
+  const candidates = [
+    context?.sessionKey,
+    context?.session?.key,
+    context?.session?.id,
+    context?.agentId,
+    context?.agent?.id,
+    context?.agent?.name,
+    context?.agentName,
+    context?.agent?.key,
+    context?.agentKey,
+    context?.metadata?.agentId,
+    context?.metadata?.agentName,
+  ];
+
+  return candidates.find((value) => typeof value === "string" && value.trim()) || "";
+}
+
+function isMainAgent(eventOrContext = {}) {
+  const context = eventOrContext?.context || eventOrContext || {};
+  const rawRef = String(getAgentReference(context) || "").toLowerCase();
+
+  if (!rawRef) return false;
+
+  return (
+    rawRef.includes("agent:main:") ||
+    rawRef.includes("main-agent") ||
+    rawRef.includes("main_agent") ||
+    rawRef === "main" ||
+    /(^|[^a-z])main([^a-z]|$)/.test(rawRef)
+  );
+}
+
+function isProtectedAgent(eventOrContext = {}) {
+  return !isMainAgent(eventOrContext);
 }
 
 const SENSITIVE_PATTERNS = [
@@ -134,8 +165,8 @@ export default definePluginEntry({
     // Can block the entire model run and return synthetic reply
     api.on("before_agent_run", async (event) => {
       const sessionKey = event?.context?.sessionKey || "";
-      if (!isProtectedAgent(sessionKey)) {
-        console.log(`[luna-middleware] SKIP main: ${sessionKey}`);
+      if (isMainAgent(event)) {
+        console.log(`[luna-middleware] SKIP main: ${sessionKey || "(no sessionKey)"}`);
         return;
       }
 
@@ -165,7 +196,7 @@ export default definePluginEntry({
     // Backup: message_sending - redact output
     api.on("message_sending", async (event, ctx) => {
       const sessionKey = ctx?.sessionKey || "";
-      if (!isProtectedAgent(sessionKey)) return;
+      if (isMainAgent(ctx)) return;
 
       const content = event?.content || "";
       if (!content) return;
