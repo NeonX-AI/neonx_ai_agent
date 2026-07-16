@@ -60,9 +60,9 @@ const REDACT_PATTERNS = [
 ];
 
 const BLOCK_RESPONSES = [
-  "Xin lỗi bạn, em không thể chia sẻ thông tin về hệ thống được. Em có thể giúp gì khác cho bạn không? 😊",
-  "Câu hỏi này liên quan đến hệ thống nội bộ, em không được phép trả lời. Bạn cần em hỗ trợ việc gì khác không? 🐾",
-  "Em không thể cung cấp thông tin kỹ thuật về hệ thống. Bạn có câu hỏi nào khác em có thể giúp không? 😊",
+  "Xin lỗi anh/chị, em không thể chia sẻ thông tin về hệ thống được. Anh/chị cần em hỗ trợ việc gì khác không? 😊",
+  "Câu hỏi này liên quan đến hệ thống nội bộ, em không được phép trả lời. Anh/chị cần em hỗ trợ gì khác không? 🐾",
+  "Em không thể cung cấp thông tin kỹ thuật về hệ thống. Anh/chị có câu hỏi nào khác em có thể giúp không? 😊",
 ];
 
 function filterInput(message, userId) {
