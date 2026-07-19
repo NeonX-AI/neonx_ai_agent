@@ -1,2 +1,2 @@
 # For test
-bash build-and-run.sh
+bash build-and-run-local.sh
