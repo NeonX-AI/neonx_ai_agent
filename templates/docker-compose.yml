@@ -1,7 +1,7 @@
 services:
-  openclaw:
+  ai_agent:
     image: ghcr.io/openclaw/openclaw:2026.7.1
-    container_name: neonx_ai_agent
+    container_name: ${CONTAINER_NAME:-neonx_ai_agent}
 
     restart: unless-stopped
 
@@ -24,8 +24,9 @@ services:
       - "18789:18789"
       - "8001:8001" # For download files from the agent
     networks:
-      - neonx-network
+      - agent_network
 
 networks:
-  neonx-network:
+  agent_network:
+    name: ${NETWORK_NAME:-neonx-network}
     external: true

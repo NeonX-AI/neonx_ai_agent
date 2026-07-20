@@ -1,5 +1,5 @@
-# For test
-bash build-and-run-test.sh
+# For local test
+./deploy.sh development
 
 # Docker iptables - Chặn port sau khi config xong
 
