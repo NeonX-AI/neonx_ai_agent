@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "dev"
-      - "main"
+      # - "main"
 
 jobs:
   deploy:
@@ -37,10 +37,45 @@ jobs:
         uses: kota65535/github-openvpn-connect-action@v3
         with:
           config_file: client.ovpn
-      # Connect to VPN if config provided
 
       - name: Remove temporary VPN files
         run: rm -f client.ovpn openvpn.log openvpn.pid
+      # Connect to VPN if config provided
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'openclaw-message-listener/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd openclaw-message-listener
+          npm ci
+
+      - name: Build project
+        run: |
+          cd openclaw-message-listener
+          npm run build
+
+      - name: Fix permissions for built files
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          port: ${{ secrets.SSH_PORT }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            echo "Show user"
+            whoami
+
+            echo ">>> Move to project directory"
+            cd ~/apps/${{ env.SERVICE_NAME }}
+
+            # Fix permissions on server for the dist directory
+            chmod -R 755 openclaw-message-listener/dist
+            chmod 644 openclaw-message-listener/dist/*
 
       - name: Copy code to server
         uses: appleboy/scp-action@master
@@ -49,7 +84,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "."
+          source: "docker-compose.yml,entrypoint.sh,openclaw-message-listener/dist"
           target: "~/apps/${{ env.SERVICE_NAME }}"
 
       - name: Deploy
