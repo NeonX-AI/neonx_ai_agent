@@ -57,7 +57,7 @@ jobs:
 
       - name: Build project
         run: |
-          cd openclaw-message-listener
+          cd templates/openclaw-message-listener
           npm run build
 
       - name: Fix permissions for built files
