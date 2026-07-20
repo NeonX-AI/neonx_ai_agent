@@ -19,13 +19,9 @@ services:
       TZ: Asia/Ho_Chi_Minh
       OPENCLAW_GATEWAY_PASSWORD: "changeme"
       OPENCLAW_HOME: /home/node
-
-    expose:
-      - "18789"
       
     ports:
-      - "192.168.1.5:18789:18789" # For testing purposes
-      - "10.8.0.9:18789:18789" # For testing purposes
+      - "18789:18789"
       - "8001:8001" # For download files from the agent
     networks:
       - neonx-network
