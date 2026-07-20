@@ -34,10 +34,11 @@ jobs:
           printf "%s" "$OPENVPN_CONFIG" > client.ovpn
 
       - name: Connect VPN
+        if: ${{ env.OPENVPN_CONFIG != '' }}
         uses: kota65535/github-openvpn-connect-action@v3
         with:
           config_file: client.ovpn
-
+      
       - name: Remove temporary VPN files
         run: rm -f client.ovpn openvpn.log openvpn.pid
       # Connect to VPN if config provided
