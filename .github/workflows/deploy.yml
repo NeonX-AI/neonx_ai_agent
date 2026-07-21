@@ -46,13 +46,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '24'
           cache: 'npm'
-          cache-dependency-path: 'openclaw-message-listener/package-lock.json'
+          cache-dependency-path: 'templates/openclaw-message-listener/package-lock.json'
 
       - name: Install dependencies
         run: |
-          cd openclaw-message-listener
+          cd templates/openclaw-message-listener
           npm ci
 
       - name: Build project
