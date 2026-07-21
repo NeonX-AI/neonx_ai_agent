@@ -75,8 +75,12 @@ jobs:
             cd ~/apps/${{ env.SERVICE_NAME }}
 
             # Fix permissions on server for the dist directory
-            chmod -R 755 templates/openclaw-message-listener/dist
-            chmod 644 templates/openclaw-message-listener/dist/*
+            if [ -d "templates/openclaw-message-listener/dist" ]; then
+              chmod -R 755 templates/openclaw-message-listener/dist
+              chmod 644 templates/openclaw-message-listener/dist/*
+            else
+              echo ">>> dist directory not found, skipping permission fix"
+            fi
 
       - name: Copy code to server
         uses: appleboy/scp-action@master
