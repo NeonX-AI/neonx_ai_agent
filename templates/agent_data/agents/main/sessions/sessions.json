@@ -1,0 +1,74 @@
+{
+  "agent:main:main": {
+    "sessionId": "f519c981-901c-4d75-afac-1a5d85f3b00d",
+    "updatedAt": 1784706958038,
+    "sessionStartedAt": 1784706941804,
+    "systemSent": true,
+    "abortedLastRun": false,
+    "chatType": "direct",
+    "compactionCount": 0,
+    "totalTokens": 0,
+    "totalTokensFresh": true,
+    "sessionFile": "/home/node/.openclaw/agents/main/sessions/f519c981-901c-4d75-afac-1a5d85f3b00d.jsonl",
+    "skillsSnapshot": {
+      "skills": [
+        {
+          "name": "clawhub"
+        },
+        {
+          "name": "diagram-maker"
+        },
+        {
+          "name": "healthcheck"
+        },
+        {
+          "name": "meme-maker",
+          "requiredEnv": []
+        },
+        {
+          "name": "node-connect"
+        },
+        {
+          "name": "node-inspect-debugger",
+          "requiredEnv": []
+        },
+        {
+          "name": "notion",
+          "primaryEnv": "NOTION_API_TOKEN",
+          "requiredEnv": []
+        },
+        {
+          "name": "python-debugpy",
+          "requiredEnv": []
+        },
+        {
+          "name": "skill-creator"
+        },
+        {
+          "name": "spike"
+        },
+        {
+          "name": "taskflow"
+        },
+        {
+          "name": "taskflow-inbox-triage"
+        },
+        {
+          "name": "weather"
+        }
+      ],
+      "version": 1784706555594,
+      "promptFormatVersion": 1,
+      "promptRef": {
+        "version": 1,
+        "algorithm": "sha256",
+        "hash": "2982dd3346e287fe87bf870297f0da3ac453f98eb40e1347017f9a29cac9834b",
+        "bytes": 4208
+      }
+    },
+    "status": "failed",
+    "startedAt": 1784706943012,
+    "endedAt": 1784706943012,
+    "runtimeMs": 0
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "providers": {
+    "neonx": {
+      "baseUrl": "https://gateway.neonx.ai/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-00574c4de85b7101-8ivk0r-452fd867",
+      "models": [
+        {
+          "id": "neonx-3.0-plus",
+          "name": "neonx-3.0-plus (Custom Provider)",
+          "contextWindow": 128000,
+          "maxTokens": 4096,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "reasoning": false
+        }
+      ]
+    }
+  }
+}

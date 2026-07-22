@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "dev"
-      # - "main"
+      - "Server_02"
 
 jobs:
   deploy:

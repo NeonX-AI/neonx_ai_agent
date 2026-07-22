@@ -35,7 +35,18 @@ PLUGIN_NAME="openclaw-message-listener"
 
 TMP=$(mktemp)
 
+# Create default config if not exists
+if [ ! -f "$CONFIG" ]; then
+    echo "Config file not found. Creating default config..."
+    mkdir -p "$CONFIG_PATH"
+    echo '{"gateway":{"mode":"local"}}' > "$CONFIG"
+fi
+
 if [ -f "$CONFIG" ]; then
+    if ! jq -e '.gateway.mode' "$CONFIG" >/dev/null; then
+        jq '.gateway.mode = "local"' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Set gateway.mode=local"
+    fi
     if ! jq -e '.commands.plugins' "$CONFIG" >/dev/null; then
         jq ".commands.plugins = true" "$CONFIG" > /tmp/openclaw.json && mv /tmp/openclaw.json "$CONFIG"
         echo "Created commands configuration"
