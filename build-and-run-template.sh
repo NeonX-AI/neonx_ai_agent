@@ -14,6 +14,8 @@ echo "Detected OS: $OS_TYPE"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+cd templates
+
 echo "Current directory: $(pwd)"
 
 # Function to check if a command exists
@@ -94,7 +96,7 @@ echo "Running containers:"
 $COMPOSE_CMD ps
 
 echo ""
-echo "OpenClaw services are now running!"
+echo "AI Agent services are now running!"
 # echo "You can access the service at http://localhost:3000"
 echo ""
 echo "To view logs: $COMPOSE_CMD logs -f"

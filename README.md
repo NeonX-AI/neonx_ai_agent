@@ -1,4 +1,7 @@
-# For local test
+# For build and run template
+./build-and-run-template.sh
+
+# For local test add client
 ./deploy.sh development
 
 # Docker iptables - Chặn port sau khi config xong
