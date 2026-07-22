@@ -47,6 +47,19 @@ if [ -f "$CONFIG" ]; then
         jq '.gateway.mode = "local"' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
         echo "Set gateway.mode=local"
     fi
+    if ! jq -e '.gateway.bind' "$CONFIG" >/dev/null; then
+        jq '.gateway.bind = "lan"' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Set gateway.bind=lan"
+    fi
+    if ! jq -e '.gateway.controlUi' "$CONFIG" >/dev/null; then
+        jq '.gateway.controlUi = {
+            "allowedOrigins": ["*"],
+            "dangerouslyAllowHostHeaderOriginFallback": true,
+            "allowInsecureAuth": true,
+            "dangerouslyDisableDeviceAuth": true
+        }' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Set gateway.controlUi configuration"
+    fi
     if ! jq -e '.commands.plugins' "$CONFIG" >/dev/null; then
         jq ".commands.plugins = true" "$CONFIG" > /tmp/openclaw.json && mv /tmp/openclaw.json "$CONFIG"
         echo "Created commands configuration"

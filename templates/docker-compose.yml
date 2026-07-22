@@ -1,4 +1,4 @@
-name: ${STACK_NAME:-neonx-ai}
+name: ${STACK_NAME:-neonx-ai-agent}
 
 services:
   ai_agent:
@@ -30,7 +30,9 @@ services:
     #   - "18789:18789"
     #   - "8001:8001" # For download files from the agent
     networks:
-      - neonx-network
+      neonx-network:
+        aliases:
+          - ${STACK_NAME:-neonx-ai-agent}
 
 networks:
   neonx-network:

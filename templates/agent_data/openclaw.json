@@ -19,7 +19,14 @@
     }
   },
   "gateway": {
-    "mode": "local"
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": ["*"],
+      "dangerouslyAllowHostHeaderOriginFallback": true,
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    }
   },
   "agents": {
     "defaults": {
@@ -28,7 +35,7 @@
       },
       "models": {
         "neonx/neonx-3.0-plus": {
-          "alias": "neonx-3.0-plus-gateway"
+          "alias": "neonx-3.0-plus"
         }
       }
     }
