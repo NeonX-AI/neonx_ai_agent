@@ -31,14 +31,14 @@ export default definePluginEntry({
       const messages = event?.messages || [];
       const prompt = event.prompt || "";
 
-      console.log(`[openclaw-message-listener] Incoming message:`, {
-        timestamp: new Date().toISOString(),
-        sessionKey,
-        userId,
-        agentId,
-        message: prompt.substring(0, 200) + (prompt.length > 200 ? "..." : ""), // Truncate long messages
-        totalMessages: messages.length,
-      });
+      // console.log(`[openclaw-message-listener] Incoming message:`, {
+      //   timestamp: new Date().toISOString(),
+      //   sessionKey,
+      //   userId,
+      //   agentId,
+      //   message: prompt.substring(0, 200) + (prompt.length > 200 ? "..." : ""), // Truncate long messages
+      //   totalMessages: messages.length,
+      // });
 
       // Continue with normal processing
       return { outcome: "pass" };
