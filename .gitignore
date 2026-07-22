@@ -14,3 +14,4 @@ templates/agent_data/state/
 templates/agent_data/logs/
 templates/agent_data/agents/main/sessions/
 templates/agent_data/workspace/openclaw-workspace-state.json
+templates/agent_data/workspace-attestations/
