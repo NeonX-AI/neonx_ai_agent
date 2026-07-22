@@ -4,4 +4,13 @@ node_modules/
 dist/
 .env
 clients/
-logs/
+
+# --- OpenClaw agent_data runtime state ---
+templates/agent_data/.DS_Store
+templates/agent_data/openclaw.json.bak
+templates/agent_data/openclaw.json.last-good
+templates/agent_data/identity/
+templates/agent_data/state/
+templates/agent_data/logs/
+templates/agent_data/agents/main/sessions/
+templates/agent_data/workspace/openclaw-workspace-state.json
