@@ -14,6 +14,8 @@ echo "Detected OS: $OS_TYPE"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+cd templates
+
 echo "Current directory: $(pwd)"
 
 # Function to check if a command exists
@@ -84,7 +86,7 @@ $COMPOSE_CMD down || true
 
 # Start services
 echo "Starting services..."
-$COMPOSE_CMD up -d --force-recreate
+STACK_NAME=neonx-ai-agent API_KEY=sk-aea5c2d612c2e3dd-qe79fw-bedefcc3 BASE_URL=http://ai_gateway:20128/v1 $COMPOSE_CMD up -d --force-recreate
 
 # Wait a moment for services to start
 sleep 3
@@ -94,7 +96,7 @@ echo "Running containers:"
 $COMPOSE_CMD ps
 
 echo ""
-echo "OpenClaw services are now running!"
+echo "AI Agent services are now running!"
 # echo "You can access the service at http://localhost:3000"
 echo ""
 echo "To view logs: $COMPOSE_CMD logs -f"

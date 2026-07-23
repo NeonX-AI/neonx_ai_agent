@@ -1,7 +1,9 @@
+name: ${STACK_NAME:-neonx-ai-agent}
+
 services:
-  openclaw:
+  ai_agent:
     image: ghcr.io/openclaw/openclaw:2026.7.1
-    container_name: neonx_ai_agent
+    # container_name: ${CONTAINER_NAME:-neonx_ai_agent}
 
     restart: unless-stopped
 
@@ -15,16 +17,27 @@ services:
       - ./agent_data:/home/node/.openclaw
       - ./entrypoint.sh:/entrypoint.sh:ro
       - ./openclaw-message-listener/dist:/app/dist/extensions/openclaw-message-listener:ro
+    env_file:
+      - .env
     environment:
       TZ: Asia/Ho_Chi_Minh
       OPENCLAW_GATEWAY_PASSWORD: "changeme"
       OPENCLAW_HOME: /home/node
+      BASE_URL: ${BASE_URL:-http://ai_gateway:20128/v1}
+      API_KEY: ${API_KEY:-sk-aea5c2d612c2e3dd-sd6l75-8a587593}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+
+    expose:
+      - "18789"
+      - "8001" # For download files from the agent
       
-    ports:
-      - "18789:18789"
-      - "8001:8001" # For download files from the agent
+    # ports:
+    #   - "18789:18789"
+    #   - "8001:8001" # For download files from the agent
     networks:
-      - neonx-network
+      neonx-network:
+        aliases:
+          - ${STACK_NAME:-neonx-ai-agent}
 
 networks:
   neonx-network:

@@ -35,7 +35,31 @@ PLUGIN_NAME="openclaw-message-listener"
 
 TMP=$(mktemp)
 
+# Create default config if not exists
+if [ ! -f "$CONFIG" ]; then
+    echo "Config file not found. Creating default config..."
+    mkdir -p "$CONFIG_PATH"
+    echo '{"gateway":{"mode":"local"}}' > "$CONFIG"
+fi
+
 if [ -f "$CONFIG" ]; then
+    if ! jq -e '.gateway.mode' "$CONFIG" >/dev/null; then
+        jq '.gateway.mode = "local"' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Set gateway.mode=local"
+    fi
+    if ! jq -e '.gateway.bind' "$CONFIG" >/dev/null; then
+        jq '.gateway.bind = "lan"' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Set gateway.bind=lan"
+    fi
+    if ! jq -e '.gateway.controlUi' "$CONFIG" >/dev/null; then
+        jq '.gateway.controlUi = {
+            "allowedOrigins": ["*"],
+            "dangerouslyAllowHostHeaderOriginFallback": true,
+            "allowInsecureAuth": true,
+            "dangerouslyDisableDeviceAuth": true
+        }' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Set gateway.controlUi configuration"
+    fi
     if ! jq -e '.commands.plugins' "$CONFIG" >/dev/null; then
         jq ".commands.plugins = true" "$CONFIG" > /tmp/openclaw.json && mv /tmp/openclaw.json "$CONFIG"
         echo "Created commands configuration"
@@ -56,6 +80,28 @@ if [ -f "$CONFIG" ]; then
         ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
         echo "Created plugins configuration"
     fi
+fi
+
+# Update BASE_URL and API_KEY from environment variables
+if [ -n "${BASE_URL:-}" ]; then
+    jq --arg baseUrl "$BASE_URL" '.models.providers.neonx.baseUrl = $baseUrl' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Updated models.providers.neonx.baseUrl from BASE_URL"
+fi
+
+if [ -n "${API_KEY:-}" ]; then
+    jq --arg apiKey "$API_KEY" '.models.providers.neonx.apiKey = $apiKey' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Updated models.providers.neonx.apiKey from API_KEY"
+fi
+
+# Enable Telegram plugin if TELEGRAM_BOT_TOKEN is provided
+if [ -n "${TELEGRAM_BOT_TOKEN:-}" ]; then
+    jq '
+    .plugins.allow |= (. + ["telegram"] | unique) |
+    .plugins.entries.telegram = {enabled: true} |
+    .channels.telegram.accounts.default.dmPolicy = "open" |
+    .channels.telegram.accounts.default.allowFrom = ["*"]
+    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Enabled Telegram plugin with open DM policy"
 fi
 
 if command -v openclaw >/dev/null 2>&1; then
