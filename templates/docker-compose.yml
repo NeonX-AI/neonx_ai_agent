@@ -26,6 +26,7 @@ services:
       BASE_URL: ${BASE_URL:-http://ai_gateway:20128/v1}
       API_KEY: ${API_KEY:-sk-aea5c2d612c2e3dd-sd6l75-8a587593}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      STACK_NAME: ${STACK_NAME:-neonx-ai-agent}
 
     expose:
       - "18789"

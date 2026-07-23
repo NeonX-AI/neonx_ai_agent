@@ -28,6 +28,16 @@ else
     JQ_AVAILABLE=true
 fi
 
+# Create self-restart script (kills current process, Docker restarts it automatically)
+cat > /usr/local/bin/openclaw-restart << 'EOF'
+#!/bin/sh
+echo "Restarting OpenClaw agent..."
+# Kill the main gateway process - Docker will restart the container
+kill 1
+EOF
+chmod +x /usr/local/bin/openclaw-restart
+echo "Self-restart script created: openclaw-restart"
+
 CONFIG_PATH="/home/node/.openclaw"
 CONFIG="$CONFIG_PATH/openclaw.json"
 # OPENCLAW_MESSAGE_LISTENER_PATH="/app/extensions/openclaw-message-listener"
@@ -133,6 +143,26 @@ for plugin in $ZALO_PLUGINS; do
         echo "Plugin already enabled: $plugin_id"
     fi
 done
+
+# Install and enable Facebook plugin
+FACEBOOK_PLUGIN="@agntdata/openclaw-facebook"
+FACEBOOK_PLUGIN_ID="openclaw-facebook"
+
+if ! jq -e ".plugins.entries.\"$FACEBOOK_PLUGIN_ID\".enabled == true" "$CONFIG" >/dev/null 2>&1; then
+    echo "Installing plugin: $FACEBOOK_PLUGIN"
+    if command -v openclaw >/dev/null 2>&1; then
+        openclaw plugins install "$FACEBOOK_PLUGIN" || echo "Warning: Failed to install $FACEBOOK_PLUGIN"
+    fi
+    
+    # Enable plugin in config
+    jq --arg pid "$FACEBOOK_PLUGIN_ID" '
+    .plugins.allow |= (. + [$pid] | unique) |
+    .plugins.entries[$pid] = {enabled: true}
+    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Enabled plugin: $FACEBOOK_PLUGIN_ID"
+else
+    echo "Plugin already enabled: $FACEBOOK_PLUGIN_ID"
+fi
 
 if command -v openclaw >/dev/null 2>&1; then
     exec openclaw gateway run
