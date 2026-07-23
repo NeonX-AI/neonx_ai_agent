@@ -86,7 +86,7 @@ $COMPOSE_CMD down || true
 
 # Start services
 echo "Starting services..."
-$COMPOSE_CMD up -d --force-recreate
+STACK_NAME=neonx-ai-agent API_KEY=sk-aea5c2d612c2e3dd-qe79fw-bedefcc3 BASE_URL=http://ai_gateway:20128/v1 $COMPOSE_CMD up -d --force-recreate
 
 # Wait a moment for services to start
 sleep 3

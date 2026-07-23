@@ -46,9 +46,9 @@
     "mode": "merge",
     "providers": {
       "neonx": {
-        "baseUrl": "http://9router:20128/v1",
+        "baseUrl": "http://ai_gateway:20128/v1",
         "api": "openai-completions",
-        "apiKey": "sk-aea5c2d612c2e3dd-sd6l75-8a587593",
+        "apiKey": "sk-aea5c2d612c2e3dd-qe79fw-bedefcc3",
         "models": [
           {
             "id": "neonx-3.0-plus",
