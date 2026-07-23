@@ -6,7 +6,6 @@ dist/
 clients/
 
 # --- OpenClaw agent_data runtime state ---
-templates/agent_data/.DS_Store
 templates/agent_data/openclaw.json.bak
 templates/agent_data/openclaw.json.last-good
 templates/agent_data/identity/
