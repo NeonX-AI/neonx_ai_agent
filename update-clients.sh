@@ -30,8 +30,8 @@ EXCLUDE_ITEMS=(
 )
 
 if [ ! -d "$CLIENTS_DIR" ]; then
-    echo "Error: Clients directory not found: $CLIENTS_DIR"
-    exit 1
+    echo "Clients directory not found: $CLIENTS_DIR — skipping update."
+    exit 0
 fi
 
 # Get list of clients

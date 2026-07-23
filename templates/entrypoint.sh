@@ -134,6 +134,26 @@ for plugin in $ZALO_PLUGINS; do
     fi
 done
 
+# Install and enable Facebook plugin
+FACEBOOK_PLUGIN="@agntdata/openclaw-facebook"
+FACEBOOK_PLUGIN_ID="openclaw-facebook"
+
+if ! jq -e ".plugins.entries.\"$FACEBOOK_PLUGIN_ID\".enabled == true" "$CONFIG" >/dev/null 2>&1; then
+    echo "Installing plugin: $FACEBOOK_PLUGIN"
+    if command -v openclaw >/dev/null 2>&1; then
+        openclaw plugins install "$FACEBOOK_PLUGIN" || echo "Warning: Failed to install $FACEBOOK_PLUGIN"
+    fi
+    
+    # Enable plugin in config
+    jq --arg pid "$FACEBOOK_PLUGIN_ID" '
+    .plugins.allow |= (. + [$pid] | unique) |
+    .plugins.entries[$pid] = {enabled: true}
+    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Enabled plugin: $FACEBOOK_PLUGIN_ID"
+else
+    echo "Plugin already enabled: $FACEBOOK_PLUGIN_ID"
+fi
+
 if command -v openclaw >/dev/null 2>&1; then
     exec openclaw gateway run
 fi
