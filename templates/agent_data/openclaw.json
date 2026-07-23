@@ -19,7 +19,16 @@
     }
   },
   "gateway": {
-    "mode": "local"
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "*"
+      ],
+      "dangerouslyAllowHostHeaderOriginFallback": true,
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    }
   },
   "agents": {
     "defaults": {
@@ -28,7 +37,7 @@
       },
       "models": {
         "neonx/neonx-3.0-plus": {
-          "alias": "neonx-3.0-plus-gateway"
+          "alias": "neonx-3.0-plus"
         }
       }
     }
@@ -37,9 +46,9 @@
     "mode": "merge",
     "providers": {
       "neonx": {
-        "baseUrl": "https://gateway.neonx.ai/v1",
+        "baseUrl": "http://ai_gateway:20128/v1",
         "api": "openai-completions",
-        "apiKey": "sk-00574c4de85b7101-8ivk0r-452fd867",
+        "apiKey": "sk-aea5c2d612c2e3dd-qe79fw-bedefcc3",
         "models": [
           {
             "id": "neonx-3.0-plus",
@@ -63,13 +72,13 @@
     }
   },
   "wizard": {
-    "lastRunAt": "2026-07-22T08:23:57.507Z",
+    "lastRunAt": "2026-07-22T15:36:26.993Z",
     "lastRunVersion": "2026.7.1",
     "lastRunCommand": "configure",
     "lastRunMode": "local"
   },
   "meta": {
     "lastTouchedVersion": "2026.7.1",
-    "lastTouchedAt": "2026-07-22T08:23:57.625Z"
+    "lastTouchedAt": "2026-07-22T15:36:27.117Z"
   }
 }
