@@ -1,3 +1,6 @@
+# Create new client
+./create-client.sh
+
 # For build and run template
 ./build-and-run-template.sh
 

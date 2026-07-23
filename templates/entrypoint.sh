@@ -93,6 +93,17 @@ if [ -n "${API_KEY:-}" ]; then
     echo "Updated models.providers.neonx.apiKey from API_KEY"
 fi
 
+# Enable Telegram plugin if TELEGRAM_BOT_TOKEN is provided
+if [ -n "${TELEGRAM_BOT_TOKEN:-}" ]; then
+    jq '
+    .plugins.allow |= (. + ["telegram"] | unique) |
+    .plugins.entries.telegram = {enabled: true} |
+    .channels.telegram.accounts.default.dmPolicy = "open" |
+    .channels.telegram.accounts.default.allowFrom = ["*"]
+    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Enabled Telegram plugin with open DM policy"
+fi
+
 if command -v openclaw >/dev/null 2>&1; then
     exec openclaw gateway run
 fi

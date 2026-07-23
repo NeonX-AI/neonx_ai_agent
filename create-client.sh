@@ -36,7 +36,7 @@ fi
 
 echo "Client name: $CLIENT_NAME"
 
-# --- Step 2: Input BASE_URL and API_KEY ---
+# --- Step 2: Input BASE_URL, API_KEY and TELEGRAM_BOT_TOKEN ---
 read -rp "Enter BASE_URL [http://ai_gateway:20128/v1]: " BASE_URL
 BASE_URL="${BASE_URL:-http://ai_gateway:20128/v1}"
 
@@ -45,6 +45,8 @@ if [ -z "$API_KEY" ]; then
     echo "Error: API_KEY cannot be empty."
     exit 1
 fi
+
+read -rp "Enter TELEGRAM_BOT_TOKEN (leave empty to skip): " TELEGRAM_BOT_TOKEN
 
 # --- Step 3: Create client directory and copy templates ---
 CLIENT_DIR="$SCRIPT_DIR/clients/$CLIENT_NAME"
@@ -76,6 +78,10 @@ update_or_append() {
 update_or_append "STACK_NAME" "$CLIENT_NAME"
 update_or_append "BASE_URL" "$BASE_URL"
 update_or_append "API_KEY" "$API_KEY"
+
+if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+    update_or_append "TELEGRAM_BOT_TOKEN" "$TELEGRAM_BOT_TOKEN"
+fi
 
 # --- Step 5: Start services ---
 echo ">>> Starting services for client: $CLIENT_NAME"
