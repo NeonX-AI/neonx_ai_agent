@@ -28,6 +28,19 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 Add whatever helps you do your job. This is your cheat sheet.
 
+## Self-Restart
+
+You can restart yourself (the container) by running:
+
+```bash
+openclaw-restart
+```
+
+This kills the main process and Docker automatically restarts the container. Use this when:
+- You need to reload configuration changes
+- A plugin installation requires a restart
+- You encounter an unrecoverable state
+
 ## Related
 
 - [Agent workspace](/concepts/agent-workspace)

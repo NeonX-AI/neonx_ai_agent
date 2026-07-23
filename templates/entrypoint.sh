@@ -38,6 +38,33 @@ EOF
 chmod +x /usr/local/bin/openclaw-restart
 echo "Self-restart script created: openclaw-restart"
 
+# Ensure TOOLS.md has self-restart instructions
+WORKSPACE_TOOLS="/home/node/.openclaw/workspace/TOOLS.md"
+if [ -f "$WORKSPACE_TOOLS" ]; then
+    if ! grep -q "openclaw-restart" "$WORKSPACE_TOOLS"; then
+        cat >> "$WORKSPACE_TOOLS" << 'TOOLSEOF'
+
+## Self-Restart
+
+You can restart yourself (the container) by running:
+
+```bash
+openclaw-restart
+```
+
+This kills the main process and Docker automatically restarts the container. Use this when:
+- You need to reload configuration changes
+- A plugin installation requires a restart
+- You encounter an unrecoverable state
+TOOLSEOF
+        echo "Added self-restart instructions to TOOLS.md"
+    else
+        echo "TOOLS.md already has self-restart instructions"
+    fi
+else
+    echo "TOOLS.md not found at $WORKSPACE_TOOLS, skipping self-restart instructions"
+fi
+
 CONFIG_PATH="/home/node/.openclaw"
 CONFIG="$CONFIG_PATH/openclaw.json"
 # OPENCLAW_MESSAGE_LISTENER_PATH="/app/extensions/openclaw-message-listener"
