@@ -28,6 +28,16 @@ else
     JQ_AVAILABLE=true
 fi
 
+# Create self-restart script (kills current process, Docker restarts it automatically)
+cat > /usr/local/bin/openclaw-restart << 'EOF'
+#!/bin/sh
+echo "Restarting OpenClaw agent..."
+# Kill the main gateway process - Docker will restart the container
+kill 1
+EOF
+chmod +x /usr/local/bin/openclaw-restart
+echo "Self-restart script created: openclaw-restart"
+
 CONFIG_PATH="/home/node/.openclaw"
 CONFIG="$CONFIG_PATH/openclaw.json"
 # OPENCLAW_MESSAGE_LISTENER_PATH="/app/extensions/openclaw-message-listener"
