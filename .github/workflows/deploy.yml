@@ -10,7 +10,7 @@ jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || 'MAIN' }}
+    environment: ${{ github.ref_name }}
     env:
       # Change the service name based on the branch being deployed
       SERVICE_NAME: neonx_ai_agent${{ github.ref == 'refs/heads/dev' && '_dev' || '' }}
