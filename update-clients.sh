@@ -5,6 +5,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLIENTS_DIR="$SCRIPT_DIR/clients"
 TEMPLATES_DIR="$SCRIPT_DIR/templates"
 
+# Parse arguments
+AUTO_YES=false
+for arg in "$@"; do
+    case $arg in
+        -y|--yes)
+            AUTO_YES=true
+            shift
+            ;;
+    esac
+done
+
 # Files/directories to update from templates
 UPDATE_ITEMS=(
     "entrypoint.sh"
@@ -35,20 +46,29 @@ echo "Found ${#CLIENTS[@]} client(s): ${CLIENTS[*]}"
 echo ""
 
 # Ask for confirmation
-read -rp "Update all clients from templates? (y/N) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Update cancelled."
-    exit 0
+if [ "$AUTO_YES" = true ]; then
+    echo "Auto-confirming update (flag -y)"
+else
+    read -rp "Update all clients from templates? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Update cancelled."
+        exit 0
+    fi
 fi
 
 # Ask if should restart containers
-read -rp "Restart docker containers after update? (Y/n) " -n 1 -r
-echo
-if [[ -z $REPLY ]] || [[ $REPLY =~ ^[Yy]$ ]]; then
+if [ "$AUTO_YES" = true ]; then
     RESTART_CONTAINERS=true
+    echo "Auto-confirming restart containers (flag -y)"
 else
-    RESTART_CONTAINERS=false
+    read -rp "Restart docker containers after update? (Y/n) " -n 1 -r
+    echo
+    if [[ -z $REPLY ]] || [[ $REPLY =~ ^[Yy]$ ]]; then
+        RESTART_CONTAINERS=true
+    else
+        RESTART_CONTAINERS=false
+    fi
 fi
 
 echo ""
