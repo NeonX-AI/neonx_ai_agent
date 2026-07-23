@@ -10,10 +10,10 @@ jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/dev' && 'DEV' || 'MAIN' }}
+    environment: ${{ github.ref_name }}
     env:
       # Change the service name based on the branch being deployed
-      SERVICE_NAME: neonx_ai_agent_${{ github.ref == 'refs/heads/dev' && 'dev' || 'main' }}
+      SERVICE_NAME: neonx_ai_agent${{ github.ref == 'refs/heads/dev' && '_dev' || '' }}
       #
       NODE_ENV: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
       OPENVPN_CONFIG: ${{ secrets.OPENVPN_CONFIG }}
@@ -89,7 +89,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "templates/docker-compose.yml,templates/entrypoint.sh,deploy.sh,create-client.sh,templates/openclaw-message-listener/dist"
+          source: "templates/docker-compose.yml,templates/entrypoint.sh,update-clients.sh,create-client.sh,templates/openclaw-message-listener/dist"
           target: "~/apps/${{ env.SERVICE_NAME }}"
 
       - name: Deploy
@@ -107,7 +107,5 @@ jobs:
             cd ~/apps/${{ env.SERVICE_NAME }}
 
             echo ">>> Run deploy script"
-            chmod +x deploy.sh
-            ./deploy.sh ${{ env.NODE_ENV }}
-
-            
+            chmod +x update-clients.sh
+            ./update-clients.sh
