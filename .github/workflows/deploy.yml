@@ -108,4 +108,4 @@ jobs:
 
             echo ">>> Run deploy script"
             chmod +x update-clients.sh
-            ./update-clients.sh
+            ./update-clients.sh -y
