@@ -28,6 +28,16 @@ else
     JQ_AVAILABLE=true
 fi
 
+# Create self-restart script (kills current process, Docker restarts it automatically)
+cat > /usr/local/bin/openclaw-restart << 'EOF'
+#!/bin/sh
+echo "Restarting OpenClaw agent..."
+# Kill the main gateway process - Docker will restart the container
+kill 1
+EOF
+chmod +x /usr/local/bin/openclaw-restart
+echo "Self-restart script created: openclaw-restart"
+
 CONFIG_PATH="/home/node/.openclaw"
 CONFIG="$CONFIG_PATH/openclaw.json"
 # OPENCLAW_MESSAGE_LISTENER_PATH="/app/extensions/openclaw-message-listener"
@@ -80,6 +90,13 @@ if [ -f "$CONFIG" ]; then
         ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
         echo "Created plugins configuration"
     fi
+
+    # Always ensure openclaw-message-listener plugin is enabled and allowed
+    jq --arg plugin "$PLUGIN_NAME" '
+    .plugins.entries[$plugin] = {enabled: true} |
+    .plugins.allow |= (. + [$plugin] | unique)
+    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Ensured openclaw-message-listener plugin is enabled and allowed"
 fi
 
 # Update BASE_URL and API_KEY from environment variables
@@ -103,6 +120,121 @@ if [ -n "${TELEGRAM_BOT_TOKEN:-}" ]; then
     ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
     echo "Enabled Telegram plugin with open DM policy"
 fi
+
+# Install and enable Zalo plugins
+ZALO_PLUGINS="@openclaw/zalo @openclaw/zalouser"
+for plugin in $ZALO_PLUGINS; do
+    plugin_id=$(echo "$plugin" | sed 's/@openclaw\///')
+    
+    # Check if plugin is already enabled
+    if ! jq -e ".plugins.entries.\"$plugin_id\".enabled == true" "$CONFIG" >/dev/null 2>&1; then
+        echo "Installing plugin: $plugin"
+        if command -v openclaw >/dev/null 2>&1; then
+            openclaw plugins install "$plugin" || echo "Warning: Failed to install $plugin"
+        fi
+        
+        # Enable plugin in config
+        jq --arg pid "$plugin_id" '
+        .plugins.allow |= (. + [$pid] | unique) |
+        .plugins.entries[$pid] = {enabled: true}
+        ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Enabled plugin: $plugin_id"
+    else
+        echo "Plugin already enabled: $plugin_id"
+    fi
+done
+
+# Install and enable Facebook plugin (from git - not yet on npm/ClawHub)
+FACEBOOK_PLUGIN="git:github.com/Dj-Shortcut/openclaw-facebook"
+FACEBOOK_PLUGIN_ID="facebook"
+PLUGIN_DIR="$CONFIG_PATH/npm/projects"
+
+# Remove stale plugin entries (old plugin names)
+for stale_id in "openclaw-facebook" "agntdata-facebook"; do
+    if jq -e ".plugins.entries[\"$stale_id\"]" "$CONFIG" >/dev/null 2>&1; then
+        jq --arg sid "$stale_id" 'del(.plugins.entries[$sid]) | .plugins.allow |= map(select(. != $sid))' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Removed stale $stale_id config"
+    fi
+done
+
+# Remove old agntdata plugin if exists
+if [ -d "$PLUGIN_DIR" ]; then
+    for old_dir in "$PLUGIN_DIR"/agntdata-openclaw-facebook-*; do
+        if [ -d "$old_dir" ]; then
+            echo "Removing old agntdata-openclaw-facebook plugin"
+            rm -rf "$old_dir"
+        fi
+    done
+fi
+
+# Check if NEW plugin is actually installed on disk
+FACEBOOK_INSTALLED=false
+# Check in extensions directory (where openclaw plugins install puts it)
+if [ -d "$CONFIG_PATH/extensions/facebook" ]; then
+    FACEBOOK_INSTALLED=true
+fi
+# Also check in npm/projects directory
+if [ "$FACEBOOK_INSTALLED" = false ] && [ -d "$PLUGIN_DIR" ]; then
+    for dir in "$PLUGIN_DIR"/dj-shortcut-facebook-* "$PLUGIN_DIR"/openclaw-facebook-*; do
+        if [ -d "$dir" ]; then
+            FACEBOOK_INSTALLED=true
+            break
+        fi
+    done
+fi
+
+# Install plugin if not found on disk
+if [ "$FACEBOOK_INSTALLED" = false ]; then
+    echo "Installing Facebook plugin from GitHub..."
+    CLONE_DIR="/tmp/openclaw-facebook"
+    rm -rf "$CLONE_DIR"
+    
+    if command -v git >/dev/null 2>&1; then
+        echo "Cloning repository..."
+        if git clone https://github.com/Dj-Shortcut/openclaw-facebook.git "$CLONE_DIR"; then
+            cd "$CLONE_DIR"
+            
+            # Install pnpm if not available
+            if ! command -v pnpm >/dev/null 2>&1; then
+                echo "Installing pnpm..."
+                npm install -g pnpm
+            fi
+            
+            echo "Installing dependencies..."
+            if npm install --include=dev --ignore-scripts; then
+                echo "Building TypeScript..."
+                if npx -p typescript tsc -p tsconfig.json; then
+                    echo "Removing .git to avoid permission issues..."
+                    rm -rf "$CLONE_DIR/.git"
+                    echo "Installing plugin to OpenClaw..."
+                    if openclaw plugins install "$CLONE_DIR" --force; then
+                        echo "✓ Successfully installed Facebook plugin"
+                    else
+                        echo "✗ Failed to install plugin to OpenClaw"
+                    fi
+                else
+                    echo "✗ TypeScript build failed"
+                fi
+            else
+                echo "✗ npm install failed"
+            fi
+        else
+            echo "✗ git clone failed"
+        fi
+    else
+        echo "✗ git not available"
+    fi
+fi
+
+# Always ensure plugin is enabled in config
+jq --arg pid "$FACEBOOK_PLUGIN_ID" '
+.plugins.allow |= (. + [$pid] | unique) |
+.plugins.entries[$pid] = {enabled: true}
+' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+echo "Ensured plugin $FACEBOOK_PLUGIN_ID is enabled"
+
+# Facebook channel config is already merged by update-clients.sh
+# No need to configure here to avoid overriding with empty values
 
 if command -v openclaw >/dev/null 2>&1; then
     exec openclaw gateway run
