@@ -17,7 +17,6 @@ services:
       - ./agent_data:/home/node/.openclaw
       - ./entrypoint.sh:/entrypoint.sh:ro
       - ./openclaw-message-listener/dist:/app/dist/extensions/openclaw-message-listener:ro
-      - ../.env.meta:/tmp/meta-credentials:ro
     env_file:
       - .env
     environment:
@@ -31,14 +30,14 @@ services:
       FACEBOOK_PAGE_ACCESS_TOKEN: ${FACEBOOK_PAGE_ACCESS_TOKEN:-}
       STACK_NAME: ${STACK_NAME:-neonx-ai-agent}
 
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 128M
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "1.0"
+    #       memory: 512M
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: 128M
 
     expose:
       - "18789"

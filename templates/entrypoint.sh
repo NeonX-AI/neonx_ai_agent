@@ -233,50 +233,8 @@ jq --arg pid "$FACEBOOK_PLUGIN_ID" '
 ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
 echo "Ensured plugin $FACEBOOK_PLUGIN_ID is enabled"
 
-# Read Meta App credentials from mounted file (not exposed to agent)
-FACEBOOK_APP_SECRET=""
-FACEBOOK_VERIFY_TOKEN=""
-if [ -f /tmp/meta-credentials ]; then
-    echo "Reading Meta App credentials..."
-    # Extract values without exporting to environment
-    FACEBOOK_APP_SECRET=$(grep "^FACEBOOK_APP_SECRET=" /tmp/meta-credentials | cut -d'=' -f2-)
-    FACEBOOK_VERIFY_TOKEN=$(grep "^FACEBOOK_VERIFY_TOKEN=" /tmp/meta-credentials | cut -d'=' -f2-)
-    # Remove file after reading to prevent agent access
-    rm -f /tmp/meta-credentials 2>/dev/null || true
-fi
-
-# Read Meta credentials from mounted file (not exposed to agent)
-FACEBOOK_APP_SECRET=""
-FACEBOOK_VERIFY_TOKEN=""
-if [ -f /tmp/meta-credentials ]; then
-    echo "Reading Meta credentials from mounted file..."
-    FACEBOOK_APP_SECRET=$(grep "^FACEBOOK_APP_SECRET=" /tmp/meta-credentials | cut -d'=' -f2-)
-    FACEBOOK_VERIFY_TOKEN=$(grep "^FACEBOOK_VERIFY_TOKEN=" /tmp/meta-credentials | cut -d'=' -f2-)
-    # Remove file after reading to prevent agent access
-    rm -f /tmp/meta-credentials
-    echo "Meta credentials loaded and file removed"
-fi
-
-# Configure Facebook channel if credentials are provided
-if [ -n "${FACEBOOK_PAGE_ID:-}" ] && [ -n "${FACEBOOK_PAGE_ACCESS_TOKEN:-}" ]; then
-    jq \
-        --arg pageId "$FACEBOOK_PAGE_ID" \
-        --arg pageAccessToken "$FACEBOOK_PAGE_ACCESS_TOKEN" \
-        --arg appSecret "${FACEBOOK_APP_SECRET:-}" \
-        --arg verifyToken "${FACEBOOK_VERIFY_TOKEN:-}" \
-        '
-        .channels.facebook = {
-            enabled: true,
-            pageId: $pageId,
-            pageAccessToken: $pageAccessToken,
-            appSecret: $appSecret,
-            verifyToken: $verifyToken,
-            dmPolicy: "open",
-            allowFrom: ["*"]
-        }
-        ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-    echo "Configured Facebook channel"
-fi
+# Facebook channel config is already merged by update-clients.sh
+# No need to configure here to avoid overriding with empty values
 
 if command -v openclaw >/dev/null 2>&1; then
     exec openclaw gateway run
