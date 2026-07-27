@@ -48,6 +48,32 @@ fi
 
 read -rp "Enter TELEGRAM_BOT_TOKEN (leave empty to skip): " TELEGRAM_BOT_TOKEN
 
+# Check if Meta App credentials exist
+META_ENV_FILE="$SCRIPT_DIR/.env.meta"
+if [ -f "$META_ENV_FILE" ]; then
+    echo "Using existing Meta Platform credentials from .env.meta"
+    source "$META_ENV_FILE"
+    FACEBOOK_APP_SECRET="${FACEBOOK_APP_SECRET:-}"
+    FACEBOOK_VERIFY_TOKEN="${FACEBOOK_VERIFY_TOKEN:-}"
+else
+    echo "Meta Platform credentials not found. Creating .env.meta..."
+    read -rp "Enter FACEBOOK_APP_SECRET (Meta App secret): " FACEBOOK_APP_SECRET
+    read -rp "Enter FACEBOOK_VERIFY_TOKEN (webhook verify token): " FACEBOOK_VERIFY_TOKEN
+    
+    if [ -n "$FACEBOOK_APP_SECRET" ] || [ -n "$FACEBOOK_VERIFY_TOKEN" ]; then
+        cat > "$META_ENV_FILE" << EOF
+# Meta Platform (Facebook) App Credentials
+# Shared across all clients
+FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
+FACEBOOK_VERIFY_TOKEN=${FACEBOOK_VERIFY_TOKEN}
+EOF
+        echo "Created .env.meta with Meta Platform credentials"
+    fi
+fi
+
+read -rp "Enter FACEBOOK_PAGE_ID (leave empty to skip): " FACEBOOK_PAGE_ID
+read -rp "Enter FACEBOOK_PAGE_ACCESS_TOKEN (leave empty to skip): " FACEBOOK_PAGE_ACCESS_TOKEN
+
 # --- Step 3: Create client directory and copy templates ---
 CLIENT_DIR="$SCRIPT_DIR/clients/$CLIENT_NAME"
 
@@ -81,6 +107,11 @@ update_or_append "API_KEY" "$API_KEY"
 
 if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
     update_or_append "TELEGRAM_BOT_TOKEN" "$TELEGRAM_BOT_TOKEN"
+fi
+
+if [ -n "$FACEBOOK_PAGE_ID" ]; then
+    update_or_append "FACEBOOK_PAGE_ID" "$FACEBOOK_PAGE_ID"
+    update_or_append "FACEBOOK_PAGE_ACCESS_TOKEN" "$FACEBOOK_PAGE_ACCESS_TOKEN"
 fi
 
 # --- Step 5: Start services ---

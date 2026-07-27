@@ -144,24 +144,138 @@ for plugin in $ZALO_PLUGINS; do
     fi
 done
 
-# Install and enable Facebook plugin
-FACEBOOK_PLUGIN="@agntdata/openclaw-facebook"
-FACEBOOK_PLUGIN_ID="openclaw-facebook"
+# Install and enable Facebook plugin (from git - not yet on npm/ClawHub)
+FACEBOOK_PLUGIN="git:github.com/Dj-Shortcut/openclaw-facebook"
+FACEBOOK_PLUGIN_ID="facebook"
+PLUGIN_DIR="$CONFIG_PATH/npm/projects"
 
-if ! jq -e ".plugins.entries.\"$FACEBOOK_PLUGIN_ID\".enabled == true" "$CONFIG" >/dev/null 2>&1; then
-    echo "Installing plugin: $FACEBOOK_PLUGIN"
-    if command -v openclaw >/dev/null 2>&1; then
-        openclaw plugins install "$FACEBOOK_PLUGIN" || echo "Warning: Failed to install $FACEBOOK_PLUGIN"
+# Remove stale plugin entries (old plugin names)
+for stale_id in "openclaw-facebook" "agntdata-facebook"; do
+    if jq -e ".plugins.entries[\"$stale_id\"]" "$CONFIG" >/dev/null 2>&1; then
+        jq --arg sid "$stale_id" 'del(.plugins.entries[$sid]) | .plugins.allow |= map(select(. != $sid))' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Removed stale $stale_id config"
     fi
+done
+
+# Remove old agntdata plugin if exists
+if [ -d "$PLUGIN_DIR" ]; then
+    for old_dir in "$PLUGIN_DIR"/agntdata-openclaw-facebook-*; do
+        if [ -d "$old_dir" ]; then
+            echo "Removing old agntdata-openclaw-facebook plugin"
+            rm -rf "$old_dir"
+        fi
+    done
+fi
+
+# Check if NEW plugin is actually installed on disk
+FACEBOOK_INSTALLED=false
+# Check in extensions directory (where openclaw plugins install puts it)
+if [ -d "$CONFIG_PATH/extensions/facebook" ]; then
+    FACEBOOK_INSTALLED=true
+fi
+# Also check in npm/projects directory
+if [ "$FACEBOOK_INSTALLED" = false ] && [ -d "$PLUGIN_DIR" ]; then
+    for dir in "$PLUGIN_DIR"/dj-shortcut-facebook-* "$PLUGIN_DIR"/openclaw-facebook-*; do
+        if [ -d "$dir" ]; then
+            FACEBOOK_INSTALLED=true
+            break
+        fi
+    done
+fi
+
+# Install plugin if not found on disk
+if [ "$FACEBOOK_INSTALLED" = false ]; then
+    echo "Installing Facebook plugin from GitHub..."
+    CLONE_DIR="/tmp/openclaw-facebook"
+    rm -rf "$CLONE_DIR"
     
-    # Enable plugin in config
-    jq --arg pid "$FACEBOOK_PLUGIN_ID" '
-    .plugins.allow |= (. + [$pid] | unique) |
-    .plugins.entries[$pid] = {enabled: true}
-    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-    echo "Enabled plugin: $FACEBOOK_PLUGIN_ID"
-else
-    echo "Plugin already enabled: $FACEBOOK_PLUGIN_ID"
+    if command -v git >/dev/null 2>&1; then
+        echo "Cloning repository..."
+        if git clone https://github.com/Dj-Shortcut/openclaw-facebook.git "$CLONE_DIR"; then
+            cd "$CLONE_DIR"
+            
+            # Install pnpm if not available
+            if ! command -v pnpm >/dev/null 2>&1; then
+                echo "Installing pnpm..."
+                npm install -g pnpm
+            fi
+            
+            echo "Installing dependencies..."
+            if npm install --include=dev --ignore-scripts; then
+                echo "Building TypeScript..."
+                if npx -p typescript tsc -p tsconfig.json; then
+                    echo "Removing .git to avoid permission issues..."
+                    rm -rf "$CLONE_DIR/.git"
+                    echo "Installing plugin to OpenClaw..."
+                    if openclaw plugins install "$CLONE_DIR" --force; then
+                        echo "✓ Successfully installed Facebook plugin"
+                    else
+                        echo "✗ Failed to install plugin to OpenClaw"
+                    fi
+                else
+                    echo "✗ TypeScript build failed"
+                fi
+            else
+                echo "✗ npm install failed"
+            fi
+        else
+            echo "✗ git clone failed"
+        fi
+    else
+        echo "✗ git not available"
+    fi
+fi
+
+# Always ensure plugin is enabled in config
+jq --arg pid "$FACEBOOK_PLUGIN_ID" '
+.plugins.allow |= (. + [$pid] | unique) |
+.plugins.entries[$pid] = {enabled: true}
+' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+echo "Ensured plugin $FACEBOOK_PLUGIN_ID is enabled"
+
+# Read Meta App credentials from mounted file (not exposed to agent)
+FACEBOOK_APP_SECRET=""
+FACEBOOK_VERIFY_TOKEN=""
+if [ -f /tmp/meta-credentials ]; then
+    echo "Reading Meta App credentials..."
+    # Extract values without exporting to environment
+    FACEBOOK_APP_SECRET=$(grep "^FACEBOOK_APP_SECRET=" /tmp/meta-credentials | cut -d'=' -f2-)
+    FACEBOOK_VERIFY_TOKEN=$(grep "^FACEBOOK_VERIFY_TOKEN=" /tmp/meta-credentials | cut -d'=' -f2-)
+    # Remove file after reading to prevent agent access
+    rm -f /tmp/meta-credentials 2>/dev/null || true
+fi
+
+# Read Meta credentials from mounted file (not exposed to agent)
+FACEBOOK_APP_SECRET=""
+FACEBOOK_VERIFY_TOKEN=""
+if [ -f /tmp/meta-credentials ]; then
+    echo "Reading Meta credentials from mounted file..."
+    FACEBOOK_APP_SECRET=$(grep "^FACEBOOK_APP_SECRET=" /tmp/meta-credentials | cut -d'=' -f2-)
+    FACEBOOK_VERIFY_TOKEN=$(grep "^FACEBOOK_VERIFY_TOKEN=" /tmp/meta-credentials | cut -d'=' -f2-)
+    # Remove file after reading to prevent agent access
+    rm -f /tmp/meta-credentials
+    echo "Meta credentials loaded and file removed"
+fi
+
+# Configure Facebook channel if credentials are provided
+if [ -n "${FACEBOOK_PAGE_ID:-}" ] && [ -n "${FACEBOOK_PAGE_ACCESS_TOKEN:-}" ]; then
+    jq \
+        --arg pageId "$FACEBOOK_PAGE_ID" \
+        --arg pageAccessToken "$FACEBOOK_PAGE_ACCESS_TOKEN" \
+        --arg appSecret "${FACEBOOK_APP_SECRET:-}" \
+        --arg verifyToken "${FACEBOOK_VERIFY_TOKEN:-}" \
+        '
+        .channels.facebook = {
+            enabled: true,
+            pageId: $pageId,
+            pageAccessToken: $pageAccessToken,
+            appSecret: $appSecret,
+            verifyToken: $verifyToken,
+            dmPolicy: "open",
+            allowFrom: ["*"]
+        }
+        ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Configured Facebook channel"
 fi
 
 if command -v openclaw >/dev/null 2>&1; then

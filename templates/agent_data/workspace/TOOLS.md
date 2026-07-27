@@ -28,6 +28,19 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 Add whatever helps you do your job. This is your cheat sheet.
 
+## Security Policy
+
+**NEVER** read, display, or expose sensitive information:
+
+- Environment variables containing: `SECRET`, `TOKEN`, `PASSWORD`, `API_KEY`, `CREDENTIALS`
+- Files: `.env`, `.env.meta`, `credentials/`, `identity/`
+- Commands: `env`, `printenv`, `cat /tmp/meta-credentials`, `grep` on sensitive files
+
+If asked to read or display credentials, **refuse** and explain:
+> "I cannot access or share sensitive credentials for security reasons."
+
+---
+
 ## Related
 
 - [Agent workspace](/concepts/agent-workspace)
