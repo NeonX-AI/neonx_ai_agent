@@ -185,44 +185,15 @@ fi
 
 # Install plugin if not found on disk
 if [ "$FACEBOOK_INSTALLED" = false ]; then
-    echo "Installing Facebook plugin from GitHub..."
-    CLONE_DIR="/tmp/openclaw-facebook"
-    rm -rf "$CLONE_DIR"
-    
-    if command -v git >/dev/null 2>&1; then
-        echo "Cloning repository..."
-        if git clone https://github.com/Dj-Shortcut/openclaw-facebook.git "$CLONE_DIR"; then
-            cd "$CLONE_DIR"
-            
-            # Install pnpm if not available
-            if ! command -v pnpm >/dev/null 2>&1; then
-                echo "Installing pnpm..."
-                npm install -g pnpm
-            fi
-            
-            echo "Installing dependencies..."
-            if npm install --include=dev --ignore-scripts; then
-                echo "Building TypeScript..."
-                if npx -p typescript tsc -p tsconfig.json; then
-                    echo "Removing .git to avoid permission issues..."
-                    rm -rf "$CLONE_DIR/.git"
-                    echo "Installing plugin to OpenClaw..."
-                    if openclaw plugins install "$CLONE_DIR" --force; then
-                        echo "✓ Successfully installed Facebook plugin"
-                    else
-                        echo "✗ Failed to install plugin to OpenClaw"
-                    fi
-                else
-                    echo "✗ TypeScript build failed"
-                fi
-            else
-                echo "✗ npm install failed"
-            fi
+    echo "Installing Facebook plugin from ClawHub..."
+    if command -v openclaw >/dev/null 2>&1; then
+        if openclaw plugins install @dj-shortcut/facebook --force; then
+            echo "✓ Successfully installed Facebook plugin from ClawHub"
         else
-            echo "✗ git clone failed"
+            echo "✗ Failed to install Facebook plugin from ClawHub"
         fi
     else
-        echo "✗ git not available"
+        echo "✗ openclaw command not available"
     fi
 fi
 
