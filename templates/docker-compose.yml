@@ -16,7 +16,6 @@ services:
     volumes:
       - ./agent_data:/home/node/.openclaw
       - ./entrypoint.sh:/entrypoint.sh:ro
-      - ./openclaw-message-listener/dist:/app/dist/extensions/openclaw-message-listener:ro
     env_file:
       - .env
       - path: .env.meta

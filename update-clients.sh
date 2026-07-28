@@ -20,8 +20,9 @@ done
 UPDATE_ITEMS=(
     "entrypoint.sh"
     "docker-compose.yml"
-    "openclaw-message-listener"
     ".env.meta"
+    "agent_data/extensions/facebook"
+    "agent_data/extensions/openclaw-message-listener"
 )
 
 # Files/directories to NEVER update (user-specific data)
@@ -151,7 +152,7 @@ if [ "$RESTART_CONTAINERS" = true ]; then
         fi
         
         # Restart containers
-        if docker compose down && docker compose up -d; then
+        if sudo docker compose down && sudo docker compose up -d; then
             echo "  ✓ Client '$client' restarted successfully"
         else
             echo "  ✗ Failed to restart client '$client'"

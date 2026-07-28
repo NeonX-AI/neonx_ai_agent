@@ -1,0 +1,21 @@
+node_modules/
+.pnpm-store/
+.npm-cache/
+# dist/
+coverage/
+reports/
+*.tsbuildinfo
+.fallow/report*.json
+.fallow/*-report*.json
+.env
+.env.*
+!.env.example
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tgz
+__pycache__/
+*.pyc
+.codex-security-scans/
+.codex-remote-attachments/

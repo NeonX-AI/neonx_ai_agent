@@ -40,10 +40,17 @@ echo "Self-restart script created: openclaw-restart"
 
 CONFIG_PATH="/home/node/.openclaw"
 CONFIG="$CONFIG_PATH/openclaw.json"
-# OPENCLAW_MESSAGE_LISTENER_PATH="/app/extensions/openclaw-message-listener"
 PLUGIN_NAME="openclaw-message-listener"
+EXTENSIONS_PATH="$CONFIG_PATH/extensions"
 
 TMP=$(mktemp)
+
+# Ensure openclaw-message-listener plugin is in extensions directory
+if [ -d "$EXTENSIONS_PATH/openclaw-message-listener" ]; then
+    echo "openclaw-message-listener plugin found in extensions directory"
+else
+    echo "Warning: openclaw-message-listener plugin not found in extensions directory"
+fi
 
 # Create default config if not exists
 if [ ! -f "$CONFIG" ]; then
@@ -185,15 +192,46 @@ fi
 
 # Install plugin if not found on disk
 if [ "$FACEBOOK_INSTALLED" = false ]; then
-    echo "Installing Facebook plugin from ClawHub..."
+    echo "Facebook plugin not found, attempting installation..."
+    
+    # Try ClawHub first
     if command -v openclaw >/dev/null 2>&1; then
-        if openclaw plugins install @dj-shortcut/facebook --force; then
+        echo "Trying to install from ClawHub..."
+        if openclaw plugins install @dj-shortcut/facebook --force 2>/dev/null; then
             echo "✓ Successfully installed Facebook plugin from ClawHub"
-        else
-            echo "✗ Failed to install Facebook plugin from ClawHub"
+            FACEBOOK_INSTALLED=true
         fi
-    else
-        echo "✗ openclaw command not available"
+    fi
+    
+    # Fallback to GitHub if ClawHub failed
+    if [ "$FACEBOOK_INSTALLED" = false ]; then
+        echo "ClawHub installation failed, trying GitHub..."
+        if command -v git >/dev/null 2>&1; then
+            CLONE_DIR="/tmp/openclaw-facebook"
+            rm -rf "$CLONE_DIR"
+            
+            if git clone --depth 1 https://github.com/Dj-Shortcut/openclaw-facebook.git "$CLONE_DIR"; then
+                cd "$CLONE_DIR"
+                
+                # Install dependencies and build
+                if npm install --include=dev --ignore-scripts >/dev/null 2>&1; then
+                    if npx -p typescript tsc -p tsconfig.json >/dev/null 2>&1; then
+                        rm -rf "$CLONE_DIR/.git"
+                        
+                        if command -v openclaw >/dev/null 2>&1; then
+                            if openclaw plugins install "$CLONE_DIR" --force; then
+                                echo "✓ Successfully installed Facebook plugin from GitHub"
+                                FACEBOOK_INSTALLED=true
+                            fi
+                        fi
+                    fi
+                fi
+            fi
+        fi
+    fi
+    
+    if [ "$FACEBOOK_INSTALLED" = false ]; then
+        echo "✗ Failed to install Facebook plugin"
     fi
 fi
 
