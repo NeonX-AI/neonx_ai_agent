@@ -179,6 +179,17 @@ FACEBOOK_INSTALLED=false
 # Check in extensions directory (where openclaw plugins install puts it)
 if [ -d "$CONFIG_PATH/extensions/facebook" ]; then
     FACEBOOK_INSTALLED=true
+    # Install dependencies if node_modules is missing
+    if [ ! -d "$CONFIG_PATH/extensions/facebook/node_modules" ]; then
+        echo "Installing Facebook plugin dependencies..."
+        cd "$CONFIG_PATH/extensions/facebook"
+        if npm install --production >/dev/null 2>&1; then
+            echo "✓ Facebook plugin dependencies installed"
+        else
+            echo "✗ Failed to install Facebook plugin dependencies"
+        fi
+        cd "$SCRIPT_DIR" 2>/dev/null || cd /
+    fi
 fi
 # Also check in npm/projects directory
 if [ "$FACEBOOK_INSTALLED" = false ] && [ -d "$PLUGIN_DIR" ]; then
