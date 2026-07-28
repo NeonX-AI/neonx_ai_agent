@@ -118,6 +118,11 @@ for client in "${CLIENTS[@]}"; do
         # Copy from templates
         if [ -d "$src" ]; then
             # It's a directory
+            # Create parent directory if it doesn't exist
+            parent_dir=$(dirname "$dst")
+            if [ ! -d "$parent_dir" ]; then
+                mkdir -p "$parent_dir"
+            fi
             rm -rf "$dst"
             cp -R "$src" "$dst"
             echo "  Updated directory: $item"
