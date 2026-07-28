@@ -10,12 +10,12 @@ services:
     stdin_open: true
     tty: true
 
-    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    entrypoint: ["/bin/sh", "/bootstrap/entrypoint.sh"]
     user: "0:0"
 
     volumes:
       - ./agent_data:/home/node/.openclaw
-      - ./entrypoint.sh:/entrypoint.sh:ro
+      - ./bootstrap:/bootstrap:ro
     env_file:
       - .env
       - path: .env.meta
