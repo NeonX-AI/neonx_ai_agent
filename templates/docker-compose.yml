@@ -19,6 +19,8 @@ services:
       - ./openclaw-message-listener/dist:/app/dist/extensions/openclaw-message-listener:ro
     env_file:
       - .env
+      - path: .env.meta
+        required: false
     environment:
       TZ: Asia/Ho_Chi_Minh
       OPENCLAW_GATEWAY_PASSWORD: "changeme"

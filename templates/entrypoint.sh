@@ -233,8 +233,30 @@ jq --arg pid "$FACEBOOK_PLUGIN_ID" '
 ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
 echo "Ensured plugin $FACEBOOK_PLUGIN_ID is enabled"
 
-# Facebook channel config is already merged by update-clients.sh
-# No need to configure here to avoid overriding with empty values
+# Configure Facebook channel from environment variables (injected from .env.meta)
+if [ -n "${FACEBOOK_PAGE_ID:-}" ] && [ -n "${FACEBOOK_PAGE_ACCESS_TOKEN:-}" ]; then
+    jq \
+        --arg pageId "$FACEBOOK_PAGE_ID" \
+        --arg pageAccessToken "$FACEBOOK_PAGE_ACCESS_TOKEN" \
+        --arg appSecret "${FACEBOOK_APP_SECRET:-}" \
+        --arg verifyToken "${FACEBOOK_VERIFY_TOKEN:-}" \
+        '
+        .channels.facebook = {
+            enabled: true,
+            pageId: $pageId,
+            pageAccessToken: $pageAccessToken,
+            appSecret: $appSecret,
+            verifyToken: $verifyToken,
+            dmPolicy: "open",
+            allowFrom: ["*"]
+        }
+        ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Configured Facebook channel from environment variables"
+    
+    # Remove sensitive environment variables after use
+    unset FACEBOOK_APP_SECRET FACEBOOK_VERIFY_TOKEN FACEBOOK_PAGE_ID FACEBOOK_PAGE_ACCESS_TOKEN
+    echo "Removed sensitive environment variables"
+fi
 
 if command -v openclaw >/dev/null 2>&1; then
     exec openclaw gateway run

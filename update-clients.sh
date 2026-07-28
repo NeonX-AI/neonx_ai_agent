@@ -131,62 +131,6 @@ done
 echo ">>> All clients updated successfully!"
 echo ""
 
-# Merge Meta credentials into each client's openclaw.json
-echo ">>> Merging Meta credentials into client configs..."
-
-for client in "${CLIENTS[@]}"; do
-    client_dir="$CLIENTS_DIR/$client"
-    config_file="$client_dir/agent_data/openclaw.json"
-    client_env_file="$client_dir/.env"
-    client_meta_file="$client_dir/.env.meta"
-    
-    if [ -f "$config_file" ] && [ -f "$client_env_file" ] && [ -f "$client_meta_file" ]; then
-        # Read Meta credentials from client's .env.meta
-        FACEBOOK_APP_SECRET=$(grep "^FACEBOOK_APP_SECRET=" "$client_meta_file" | cut -d'=' -f2-)
-        FACEBOOK_VERIFY_TOKEN=$(grep "^FACEBOOK_VERIFY_TOKEN=" "$client_meta_file" | cut -d'=' -f2-)
-        
-        if [ -n "$FACEBOOK_APP_SECRET" ] || [ -n "$FACEBOOK_VERIFY_TOKEN" ]; then
-            # Check if client has Facebook credentials
-            FACEBOOK_PAGE_ID=$(grep "^FACEBOOK_PAGE_ID=" "$client_env_file" 2>/dev/null | cut -d'=' -f2-)
-            FACEBOOK_PAGE_ACCESS_TOKEN=$(grep "^FACEBOOK_PAGE_ACCESS_TOKEN=" "$client_env_file" 2>/dev/null | cut -d'=' -f2-)
-            
-            if [ -n "$FACEBOOK_PAGE_ID" ] && [ -n "$FACEBOOK_PAGE_ACCESS_TOKEN" ]; then
-                # Backup config
-                cp "$config_file" "$config_file.backup-$(date +%Y%m%d-%H%M%S)"
-                
-                # Create or update Facebook channel config with all credentials
-                if command -v jq >/dev/null 2>&1; then
-                    jq --arg pageId "$FACEBOOK_PAGE_ID" \
-                       --arg pageAccessToken "$FACEBOOK_PAGE_ACCESS_TOKEN" \
-                       --arg appSecret "$FACEBOOK_APP_SECRET" \
-                       --arg verifyToken "$FACEBOOK_VERIFY_TOKEN" \
-                       '.channels.facebook = {
-                           enabled: true,
-                           pageId: $pageId,
-                           pageAccessToken: $pageAccessToken,
-                           appSecret: $appSecret,
-                           verifyToken: $verifyToken,
-                           dmPolicy: "open",
-                           allowFrom: ["*"]
-                       }' \
-                       "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
-                    echo "  ✓ Configured Facebook channel for: $client"
-                else
-                    echo "  ⚠ jq not found, skipping credential merge for: $client"
-                fi
-            else
-                echo "  ⚠ No Facebook credentials found for: $client"
-            fi
-        else
-            echo "  ⚠ No Meta credentials found in $client/.env.meta"
-        fi
-    else
-        echo "  ⚠ Missing required files for: $client"
-    fi
-done
-
-echo ""
-
 if [ "$RESTART_CONTAINERS" = true ]; then
     echo ">>> Restarting docker containers..."
     echo ""
