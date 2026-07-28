@@ -100,14 +100,17 @@ for client in "${CLIENTS[@]}"; do
         # Backup existing file if it exists
         if [ -e "$dst" ]; then
             backup="$dst.backup-$(date +%Y%m%d-%H%M%S)"
-            cp -R "$dst" "$backup"
-            echo "  Backed up: $item -> $(basename "$backup")"
-            
-            # Keep only the 5 most recent backups
-            if [ -d "$dst" ]; then
-                ls -dt "$dst".backup-* 2>/dev/null | tail -n +6 | xargs rm -rf
+            if cp -R "$dst" "$backup" 2>/dev/null; then
+                echo "  Backed up: $item -> $(basename "$backup")"
+                
+                # Keep only the 5 most recent backups
+                if [ -d "$dst" ]; then
+                    ls -dt "$dst".backup-* 2>/dev/null | tail -n +6 | xargs rm -rf
+                else
+                    ls -dt "$dst".backup-* 2>/dev/null | tail -n +6 | xargs rm -f
+                fi
             else
-                ls -dt "$dst".backup-* 2>/dev/null | tail -n +6 | xargs rm -f
+                echo "  Warning: Cannot backup $item (permission denied), skipping backup"
             fi
         fi
         
