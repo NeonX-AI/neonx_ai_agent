@@ -135,8 +135,16 @@ for client in "${CLIENTS[@]}"; do
             if [ ! -d "$parent_dir" ]; then
                 mkdir -p "$parent_dir"
             fi
-            rm -rf "$dst"
-            cp -R "$src" "$dst"
+            # Use rsync to sync directory (handles permission issues better)
+            if command -v rsync >/dev/null 2>&1; then
+                rsync -a --delete --chmod=u+rwX "$src/" "$dst/" 2>/dev/null || {
+                    # Fallback to cp if rsync fails
+                    cp -Rf "$src" "$dst" 2>/dev/null || cp -R "$src" "$dst"
+                }
+            else
+                # Fallback to cp with force
+                cp -Rf "$src" "$dst" 2>/dev/null || cp -R "$src" "$dst"
+            fi
             echo "  Updated directory: $item"
         else
             # It's a file
