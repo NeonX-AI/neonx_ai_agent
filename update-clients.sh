@@ -140,6 +140,10 @@ for client in "${CLIENTS[@]}"; do
             echo "  Updated directory: $item"
         else
             # It's a file
+            # Remove existing file first to avoid permission issues
+            if [ -e "$dst" ]; then
+                rm -f "$dst" 2>/dev/null || true
+            fi
             cp "$src" "$dst"
             echo "  Updated file: $item"
         fi
