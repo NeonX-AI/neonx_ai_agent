@@ -16,9 +16,10 @@ services:
     volumes:
       - ./agent_data:/home/node/.openclaw
       - ./bootstrap:/bootstrap:ro
+      - ../../extensions:/extensions:ro
     env_file:
       - .env
-      - path: .env.meta
+      - path: ../.env.meta
         required: false
     environment:
       TZ: Asia/Ho_Chi_Minh
@@ -35,18 +36,18 @@ services:
       resources:
         limits:
           cpus: "1.0"
-          memory: 512M
+          memory: 1G
         reservations:
           cpus: "0.25"
-          memory: 128M
+          memory: 256M
 
     # expose:
     #   - "18789"
     #   - "8001" # For download files from the agent
       
     ports:
-      - "18789:18789"
-      - "8001:8001" # For download files from the agent
+      - "${HOST_PORT_18789:-18789}:18789"
+      - "${HOST_PORT_8001:-8001}:8001" # For download files from the agent
     networks:
       neonx-network:
         aliases:

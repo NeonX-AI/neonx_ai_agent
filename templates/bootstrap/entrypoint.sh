@@ -12,16 +12,19 @@ export SCRIPT_DIR
 # 2. Setup restart command
 . "$SCRIPT_DIR/modules/restart/setup.sh"
 
-# 3. Initialize config
+# 3. Setup plugins (before config init so plugins are available)
+. "$SCRIPT_DIR/modules/plugins/openclaw-message-listener.sh"
+
+# 4. Initialize config
 . "$SCRIPT_DIR/modules/config/init.sh"
 
-# 4. Configure models
+# 5. Configure models
 . "$SCRIPT_DIR/modules/config/models.sh"
 
-# 5. Setup plugins
+# 6. Setup other plugins
 . "$SCRIPT_DIR/modules/plugins/telegram.sh"
 . "$SCRIPT_DIR/modules/plugins/zalo.sh"
-. "$SCRIPT_DIR/modules/plugins/facebook.sh"
+# . "$SCRIPT_DIR/modules/plugins/facebook.sh"
 
-# 6. Start gateway
+# 7. Start gateway
 . "$SCRIPT_DIR/modules/gateway/start.sh"
