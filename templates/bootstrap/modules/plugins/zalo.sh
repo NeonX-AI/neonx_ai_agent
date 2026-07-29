@@ -1,11 +1,28 @@
 #!/bin/sh
 # Module: Zalo plugins setup
-# Installs and enables Zalo plugins
+# Installs openzca npm library and Zalo plugins
 
 CONFIG_PATH="/home/node/.openclaw"
 CONFIG="$CONFIG_PATH/openclaw.json"
 TMP=$(mktemp)
 
+# Install openzca npm package globally
+echo "Installing openzca npm package..."
+if command -v npm >/dev/null 2>&1; then
+    npm install -g openzca 2>&1 || echo "Warning: Failed to install openzca globally"
+else
+    echo "Warning: npm not found, cannot install openzca"
+fi
+
+# Check if openzca is installed
+if command -v openzca >/dev/null 2>&1; then
+    echo "✓ openzca installed successfully"
+    openzca --version 2>&1 || true
+else
+    echo "✗ openzca not found in PATH"
+fi
+
+# Install Zalo plugins
 ZALO_PLUGINS="@openclaw/zalo @openclaw/zalouser"
 for plugin in $ZALO_PLUGINS; do
     plugin_id=$(echo "$plugin" | sed 's/@openclaw\///')
