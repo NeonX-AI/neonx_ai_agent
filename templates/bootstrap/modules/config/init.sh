@@ -63,8 +63,9 @@ if [ -f "$CONFIG" ]; then
     fi
 
     # Always ensure openclaw-message-listener plugin is enabled and allowed
-    jq --arg plugin "$PLUGIN_NAME" '
+    jq --arg plugin "$PLUGIN_NAME" --arg path "$EXTENSIONS_PATH/$PLUGIN_NAME" '
     .plugins.entries[$plugin] = {enabled: true} |
+    .plugins.load.paths |= (. + [$path] | unique) |
     .plugins.allow |= (. + [$plugin] | unique)
     ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
     echo "Ensured openclaw-message-listener plugin is enabled and allowed"

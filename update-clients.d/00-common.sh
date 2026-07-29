@@ -22,11 +22,9 @@ export AUTO_YES
 
 # Files/directories to update from templates
 UPDATE_ITEMS=(
-    "entrypoint.sh"
+    "bootstrap/entrypoint.sh"
+    "bootstrap/modules"
     "docker-compose.yml"
-    ".env.meta"
-    "agent_data/extensions/facebook"
-    "agent_data/extensions/openclaw-message-listener"
 )
 
 # Files/directories to NEVER update (user-specific data)

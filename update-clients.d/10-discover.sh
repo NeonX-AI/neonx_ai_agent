@@ -8,8 +8,8 @@ if [ ! -d "$CLIENTS_DIR" ]; then
     exit 0
 fi
 
-# Get list of clients (only directories, skip files like .env.meta)
-CLIENTS=($(find "$CLIENTS_DIR" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -exec basename {} \;))
+# Get list of clients (only directories, skip files like .env.meta and backups/)
+CLIENTS=($(find "$CLIENTS_DIR" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -not -name 'backups' -exec basename {} \;))
 
 if [ ${#CLIENTS[@]} -eq 0 ]; then
     echo "No clients found in $CLIENTS_DIR"
