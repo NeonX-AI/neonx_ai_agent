@@ -14,6 +14,7 @@ export SCRIPT_DIR
 
 # 3. Setup plugins (before config init so plugins are available)
 . "$SCRIPT_DIR/modules/plugins/openclaw-message-listener.sh"
+. "$SCRIPT_DIR/modules/plugins/facebook.sh"
 
 # 4. Initialize config
 . "$SCRIPT_DIR/modules/config/init.sh"
@@ -24,7 +25,6 @@ export SCRIPT_DIR
 # 6. Setup other plugins
 . "$SCRIPT_DIR/modules/plugins/telegram.sh"
 . "$SCRIPT_DIR/modules/plugins/zalo.sh"
-# . "$SCRIPT_DIR/modules/plugins/facebook.sh"
 
 # 7. Start gateway
 . "$SCRIPT_DIR/modules/gateway/start.sh"

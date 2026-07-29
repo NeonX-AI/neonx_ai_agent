@@ -31,23 +31,30 @@ fi
 FACEBOOK_INSTALLED=false
 # Check in extensions directory (where openclaw plugins install puts it)
 if [ -d "$CONFIG_PATH/extensions/facebook" ]; then
-    FACEBOOK_INSTALLED=true
-    # Install dependencies if node_modules is missing
-    if [ ! -d "$CONFIG_PATH/extensions/facebook/node_modules" ]; then
-        echo "Installing Facebook plugin dependencies..."
-        cd "$CONFIG_PATH/extensions/facebook"
-        if npm install --production >/dev/null 2>&1; then
-            echo "✓ Facebook plugin dependencies installed"
-        else
-            echo "✗ Failed to install Facebook plugin dependencies"
+    # Verify it's a complete installation
+    if [ -f "$CONFIG_PATH/extensions/facebook/package.json" ]; then
+        FACEBOOK_INSTALLED=true
+        # Install dependencies if node_modules is missing
+        if [ ! -d "$CONFIG_PATH/extensions/facebook/node_modules" ]; then
+            echo "Installing Facebook plugin dependencies..."
+            cd "$CONFIG_PATH/extensions/facebook"
+            if npm install --omit=dev 2>&1; then
+                echo "✓ Facebook plugin dependencies installed"
+            else
+                echo "✗ Failed to install Facebook plugin dependencies"
+            fi
+            cd "$SCRIPT_DIR" 2>/dev/null || cd /
         fi
-        cd "$SCRIPT_DIR" 2>/dev/null || cd /
+    else
+        # Remove incomplete installation
+        echo "Removing incomplete Facebook plugin installation..."
+        rm -rf "$CONFIG_PATH/extensions/facebook"
     fi
 fi
 # Also check in npm/projects directory
 if [ "$FACEBOOK_INSTALLED" = false ] && [ -d "$PLUGIN_DIR" ]; then
     for dir in "$PLUGIN_DIR"/dj-shortcut-facebook-* "$PLUGIN_DIR"/openclaw-facebook-*; do
-        if [ -d "$dir" ]; then
+        if [ -f "$dir/package.json" ]; then
             FACEBOOK_INSTALLED=true
             break
         fi
@@ -61,7 +68,7 @@ if [ "$FACEBOOK_INSTALLED" = false ]; then
     # Try ClawHub first
     if command -v openclaw >/dev/null 2>&1; then
         echo "Trying to install from ClawHub..."
-        if openclaw plugins install @dj-shortcut/facebook --force 2>/dev/null; then
+        if openclaw plugins install clawhub:@dj-shortcut/facebook --force 2>&1; then
             echo "✓ Successfully installed Facebook plugin from ClawHub"
             FACEBOOK_INSTALLED=true
         fi
@@ -70,32 +77,44 @@ if [ "$FACEBOOK_INSTALLED" = false ]; then
     # Fallback to GitHub if ClawHub failed
     if [ "$FACEBOOK_INSTALLED" = false ]; then
         echo "ClawHub installation failed, trying GitHub..."
-        if command -v git >/dev/null 2>&1; then
-            CLONE_DIR="/tmp/openclaw-facebook"
-            rm -rf "$CLONE_DIR"
-            
-            if git clone --depth 1 https://github.com/Dj-Shortcut/openclaw-facebook.git "$CLONE_DIR"; then
-                cd "$CLONE_DIR"
-                
-                # Install dependencies and build
-                if npm install --include=dev --ignore-scripts >/dev/null 2>&1; then
-                    if npx -p typescript tsc -p tsconfig.json >/dev/null 2>&1; then
-                        rm -rf "$CLONE_DIR/.git"
-                        
-                        if command -v openclaw >/dev/null 2>&1; then
-                            if openclaw plugins install "$CLONE_DIR" --force; then
-                                echo "✓ Successfully installed Facebook plugin from GitHub"
-                                FACEBOOK_INSTALLED=true
-                            fi
-                        fi
-                    fi
-                fi
+        if command -v openclaw >/dev/null 2>&1; then
+            if openclaw plugins install https://github.com/Dj-Shortcut/openclaw-facebook.git --force 2>&1; then
+                echo "✓ Successfully installed Facebook plugin from GitHub"
+                FACEBOOK_INSTALLED=true
             fi
         fi
     fi
     
     if [ "$FACEBOOK_INSTALLED" = false ]; then
         echo "✗ Failed to install Facebook plugin"
+    fi
+fi
+
+# Install dependencies after plugin installation
+if [ "$FACEBOOK_INSTALLED" = true ]; then
+    # Find the plugin directory
+    PLUGIN_PATH=""
+    if [ -d "$CONFIG_PATH/extensions/facebook" ]; then
+        PLUGIN_PATH="$CONFIG_PATH/extensions/facebook"
+    elif [ -d "$PLUGIN_DIR" ]; then
+        for dir in "$PLUGIN_DIR"/dj-shortcut-facebook-* "$PLUGIN_DIR"/openclaw-facebook-*; do
+            if [ -d "$dir" ]; then
+                PLUGIN_PATH="$dir"
+                break
+            fi
+        done
+    fi
+    
+    # Install npm dependencies if node_modules is missing
+    if [ -n "$PLUGIN_PATH" ] && [ ! -d "$PLUGIN_PATH/node_modules" ]; then
+        echo "Installing Facebook plugin dependencies..."
+        cd "$PLUGIN_PATH"
+        if npm install --production 2>&1; then
+            echo "✓ Facebook plugin dependencies installed"
+        else
+            echo "✗ Failed to install Facebook plugin dependencies"
+        fi
+        cd "$SCRIPT_DIR" 2>/dev/null || cd /
     fi
 fi
 
