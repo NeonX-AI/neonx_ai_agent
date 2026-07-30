@@ -1,12 +1,8 @@
 # Create new client
-./create-client.sh
+sudo ./create-client.sh
 
-# For build and run template
-./build-and-run-template.sh
-
-# For local test add client
-./deploy.sh development
-./deploy.sh development http://9router:20128/v1 sk-aea5c2d612c2e3dd-sd6l75-8a587593
+# Update clients
+sudo ./update-clients.sh
 
 # Docker iptables - Chặn port sau khi config xong
 

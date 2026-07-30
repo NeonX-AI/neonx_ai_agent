@@ -20,12 +20,25 @@ for client in "${CLIENTS[@]}"; do
 
     mkdir -p "$backup_dir"
 
-    if (cd "$client_dir" && zip -r -q "$backup_zip" . -x "backups/*" -x "*/node_modules/*") 2>/dev/null; then
-        echo "  ✓ Full backup: $backup_zip"
+    # Try zip first, fallback to tar.gz if zip is not available
+    if command -v zip >/dev/null 2>&1; then
+        if (cd "$client_dir" && zip -r -q "$backup_zip" . -x "backups/*" -x "*/node_modules/*") 2>/dev/null; then
+            echo "  ✓ Full backup: $backup_zip"
+        else
+            echo "  ✗ Failed to create backup, skipping update for safety"
+            rm -f "$backup_zip"
+            continue
+        fi
     else
-        echo "  ✗ Failed to create backup, skipping update for safety"
-        rm -f "$backup_zip"
-        continue
+        # Fallback to tar.gz
+        backup_zip="$backup_dir/$backup_name.tar.gz"
+        if (cd "$client_dir" && tar -czf "$backup_zip" --exclude='backups' --exclude='*/node_modules' .) 2>/dev/null; then
+            echo "  ✓ Full backup: $backup_zip"
+        else
+            echo "  ✗ Failed to create backup, skipping update for safety"
+            rm -f "$backup_zip"
+            continue
+        fi
     fi
 
     # Keep only the 10 most recent backups
