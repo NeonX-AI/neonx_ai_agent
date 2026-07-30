@@ -41,11 +41,11 @@ services:
           cpus: "0.25"
           memory: 256M
 
+    # Default: publish ports to host
+    # For clients running multiple containers on same host, replace with:
     # expose:
     #   - "18789"
-    #   - "8001" # For download files from the agent
-
-    # Uncomment and set HOST_PORT_* in .env to publish ports to host
+    #   - "8001"
     ports:
       - "${HOST_PORT_18789:-}:18789"
       - "${HOST_PORT_8001:-}:8001"
