@@ -19,7 +19,7 @@ services:
       - ../../extensions:/extensions:ro
     env_file:
       - .env
-      - path: ../.env.meta
+      - path: ../../.env.meta
         required: false
     environment:
       TZ: Asia/Ho_Chi_Minh
@@ -30,6 +30,8 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       FACEBOOK_PAGE_ID: ${FACEBOOK_PAGE_ID:-}
       FACEBOOK_PAGE_ACCESS_TOKEN: ${FACEBOOK_PAGE_ACCESS_TOKEN:-}
+      FACEBOOK_APP_SECRET: ${FACEBOOK_APP_SECRET:-}
+      FACEBOOK_VERIFY_TOKEN: ${FACEBOOK_VERIFY_TOKEN:-}
       STACK_NAME: ${STACK_NAME:-neonx-ai-agent}
 
     deploy:
