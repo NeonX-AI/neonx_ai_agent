@@ -47,8 +47,8 @@ services:
 
     # Uncomment and set HOST_PORT_* in .env to publish ports to host
     ports:
-      - "${HOST_PORT_18789}:18789"
-      - "${HOST_PORT_8001}:8001"
+      - "${HOST_PORT_18789:-}:18789"
+      - "${HOST_PORT_8001:-}:8001"
     networks:
       neonx-network:
         aliases:
