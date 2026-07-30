@@ -77,6 +77,11 @@ for client in "${CLIENTS[@]}"; do
             fi
             echo "  Updated directory: $item"
         else
+            # Create parent directory if it doesn't exist
+            parent_dir=$(dirname "$dst")
+            if [ ! -d "$parent_dir" ]; then
+                mkdir -p "$parent_dir"
+            fi
             if [ -e "$dst" ]; then
                 rm -f "$dst" 2>/dev/null || true
             fi
