@@ -28,7 +28,7 @@ export default definePluginEntry({
       const sessionKey = event?.context?.sessionKey || "";
       const userId = event?.context?.userId || "unknown";
       const agentId = event?.context?.agentId || "unknown";
-      const messages = event?.messages || [];
+      // const messages = event?.messages || [];
       const prompt = event.prompt || "";
 
       // console.log(`[openclaw-message-listener] Incoming message:`, {

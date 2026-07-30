@@ -7,7 +7,9 @@
     "dev": "tsc --watch"
   },
   "openclaw": {
-    "extensions": ["./dist/index.js"],
+    "extensions": [
+      "./dist/index.js"
+    ],
     "hooks": {
       "allowConversationAccess": true
     },
