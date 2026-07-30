@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 export SCRIPT_DIR
 
 # 1. Install system dependencies
-# . "$SCRIPT_DIR/modules/nano/install.sh"
+. "$SCRIPT_DIR/modules/nano/install.sh"
 . "$SCRIPT_DIR/modules/jq/install.sh"
 
 # 2. Setup restart command
