@@ -41,8 +41,8 @@ for client in "${CLIENTS[@]}"; do
         fi
     fi
 
-    # Keep only the 10 most recent backups
-    ls -dt "$backup_dir"/*.zip 2>/dev/null | tail -n +11 | xargs rm -f
+    # Keep only the 10 most recent backups (both .zip and .tar.gz)
+    ls -dt "$backup_dir"/*.zip "$backup_dir"/*.tar.gz 2>/dev/null | tail -n +11 | xargs -r rm -f 2>/dev/null || true
 
     # --- Update from templates ---
     for item in "${UPDATE_ITEMS[@]}"; do
