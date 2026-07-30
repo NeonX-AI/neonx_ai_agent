@@ -20,7 +20,7 @@ if [ "$RESTART_CONTAINERS" = true ]; then
         fi
         
         # Restart containers
-        if sudo docker compose down && sudo docker compose up -d; then
+        if docker compose down && docker compose up -d; then
             echo "  ✓ Client '$client' restarted successfully"
         else
             echo "  ✗ Failed to restart client '$client'"
