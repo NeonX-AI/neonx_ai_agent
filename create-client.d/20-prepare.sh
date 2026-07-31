@@ -32,4 +32,20 @@ if [ -n "$FACEBOOK_PAGE_ID" ]; then
     update_or_append "$ENV_FILE" "FACEBOOK_PAGE_ACCESS_TOKEN" "$FACEBOOK_PAGE_ACCESS_TOKEN"
 fi
 
+echo ">>> Updating openclaw.json with model: $MODEL_NAME"
+OPENCLAW_JSON="$CLIENT_DIR/agent_data/openclaw.json"
+if [ -f "$OPENCLAW_JSON" ]; then
+    # Provider is hardcoded as "neonx"
+    PROVIDER="neonx"
+    MODEL_ID="$PROVIDER/$MODEL_NAME"
+    
+    # Update agents.defaults.model.primary
+    jq --arg model "$MODEL_ID" '.agents.defaults.model.primary = $model' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
+    
+    # Update agents.defaults.models
+    jq --arg model "$MODEL_ID" --arg alias "$MODEL_NAME" '.agents.defaults.models = {($model): {"alias": $alias}}' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
+    
+    echo "  ✓ Model configured: $MODEL_NAME"
+fi
+
 export CLIENT_DIR ENV_FILE
