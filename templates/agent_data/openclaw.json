@@ -39,6 +39,9 @@
         "neonx/neonx-3.0-plus": {
           "alias": "neonx-3.0-plus"
         }
+      },
+      "session": {
+        "dmScope": "per-channel-peer"
       }
     }
   },
