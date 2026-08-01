@@ -15,6 +15,7 @@ services:
 
     volumes:
       - ./agent_data:/home/node/.openclaw
+      - ./projects:/home/node/.openclaw/projects
       - ./bootstrap:/bootstrap:ro
       - ../../extensions:/extensions:ro
     env_file:

@@ -52,6 +52,14 @@ Memory is limited. "Mental notes" don't survive session restarts; files do. Befo
 
 Before proposing or building a custom system, feature, workflow, tool, integration, or automation, check briefly for open-source projects, maintained libraries, existing OpenClaw plugins, or free platforms that already solve it well enough. Prefer those when adequate. Build custom only when existing options are unsuitable, too expensive, unmaintained, unsafe, non-compliant, or the user explicitly asks for custom. Avoid paid-service recommendations unless the user explicitly approves spend. Keep this lightweight - a preflight gate, not a research assignment.
 
+## Projects Directory
+
+When you need to create a programming project (web app, API, library, script, etc.), **always** create it inside `/home/node/.openclaw/projects/`. This directory is mounted to the host so projects persist and are accessible outside the container.
+
+- Use `/home/node/.openclaw/projects/<project-name>/` as the project root.
+- Never create projects in `/tmp`, `/home/node`, or other ephemeral locations.
+- Each project should be a self-contained directory with its own structure.
+
 ## External vs Internal
 
 **Safe to do freely:** read files, explore, organize, learn; search the web, check calendars; work within this workspace.
