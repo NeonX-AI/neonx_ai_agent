@@ -32,7 +32,9 @@ if [ -n "$FACEBOOK_PAGE_ID" ]; then
     update_or_append "$ENV_FILE" "FACEBOOK_PAGE_ACCESS_TOKEN" "$FACEBOOK_PAGE_ACCESS_TOKEN"
 fi
 
-update_or_append "$ENV_FILE" "MODEL_NAME" "$MODEL_NAME"
+# Set MODEL in format provider/model (e.g., qltech/neonx-3.0-plus)
+MODEL="$MODEL_NAME"
+update_or_append "$ENV_FILE" "MODEL" "$MODEL"
 
 echo ">>> Updating openclaw.json with model: $MODEL_NAME"
 OPENCLAW_JSON="$CLIENT_DIR/agent_data/openclaw.json"
