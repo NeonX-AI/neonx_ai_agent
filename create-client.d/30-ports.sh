@@ -20,19 +20,16 @@ if [[ "$PUBLISH_PORTS" =~ ^[Yy]$ ]]; then
 else
     update_or_append "$ENV_FILE" "HOST_PORT_18789" ""
     update_or_append "$ENV_FILE" "HOST_PORT_8001" ""
-    python3 - "$CLIENT_DIR/docker-compose.yml" <<'PY'
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-text = path.read_text()
-old = '    ports:\n      - "${HOST_PORT_18789:-18789}:18789"\n      - "${HOST_PORT_8001:-8001}:8001" # For download files from the agent\n'
-new = '    ports: []\n'
-if old in text:
-    text = text.replace(old, new)
-else:
-    text = text.replace('    ports:\n', '    ports: []\n')
-path.write_text(text)
-PY
+    # Use awk to remove ports section (cross-platform, no Python needed)
+    awk '
+    /^    ports:/ {
+        print "    ports: []"
+        skip=1
+        next
+    }
+    skip && /^      - / { next }
+    skip && !/^      - / { skip=0 }
+    { print }
+    ' "$CLIENT_DIR/docker-compose.yml" > "$CLIENT_DIR/docker-compose.yml.tmp" && mv "$CLIENT_DIR/docker-compose.yml.tmp" "$CLIENT_DIR/docker-compose.yml"
     echo ">>> Ports will not be exposed to the host"
 fi
