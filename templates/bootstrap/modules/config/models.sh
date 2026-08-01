@@ -21,8 +21,20 @@ if [ -n "${MODEL_NAME:-}" ]; then
     PROVIDER="neonx"
     MODEL_ID="$PROVIDER/$MODEL_NAME"
     TMP=$(mktemp)
+    
+    # Update agents.defaults and models.providers.neonx.models array
     jq --arg model "$MODEL_ID" --arg alias "$MODEL_NAME" \
-        '.agents.defaults.model.primary = $model | .agents.defaults.models = {($model): {"alias": $alias}}' \
+        '.agents.defaults.model.primary = $model |
+         .agents.defaults.models = {($model): {"alias": $alias}} |
+         .models.providers.neonx.models = [{
+           "id": $alias,
+           "name": ($alias + " (Custom Provider)"),
+           "contextWindow": 128000,
+           "maxTokens": 4096,
+           "input": ["text", "image"],
+           "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+           "reasoning": false
+         }]' \
         "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
     echo "Updated model to: $MODEL_NAME"
 fi
