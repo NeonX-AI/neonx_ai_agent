@@ -10,7 +10,12 @@ cd "$CLIENT_DIR"
 # Create external network if it doesn't exist
 if ! docker network inspect neonx-network >/dev/null 2>&1; then
     echo ">>> Creating external network: neonx-network"
-    sudo docker network create neonx-network
+    if docker network create neonx-network 2>/dev/null; then
+        echo "  ✓ Network created"
+    else
+        echo "  ! Failed to create network. You may need to run manually:"
+        echo "    docker network create neonx-network"
+    fi
 fi
 
 STACK_NAME="$CLIENT_NAME" API_KEY="$API_KEY" BASE_URL="$BASE_URL" $COMPOSE_CMD up -d --force-recreate

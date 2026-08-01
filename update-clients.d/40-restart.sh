@@ -6,7 +6,12 @@ source "$SCRIPT_DIR/update-clients.d/00-common.sh"
 # Create external network if it doesn't exist
 if ! docker network inspect neonx-network >/dev/null 2>&1; then
     echo ">>> Creating external network: neonx-network"
-    sudo docker network create neonx-network
+    if docker network create neonx-network 2>/dev/null; then
+        echo "  ✓ Network created"
+    else
+        echo "  ! Failed to create network. You may need to run manually:"
+        echo "    docker network create neonx-network"
+    fi
 fi
 
 if [ "$RESTART_CONTAINERS" = true ]; then
