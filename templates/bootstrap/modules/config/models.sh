@@ -17,6 +17,7 @@ if [ -n "${API_KEY:-}" ]; then
 fi
 
 # Update model from MODEL_NAME env var (if set)
+echo "MODEL_NAME from env: '${MODEL_NAME:-}'"
 if [ -n "${MODEL_NAME:-}" ]; then
     PROVIDER="neonx"
     MODEL_ID="$PROVIDER/$MODEL_NAME"
