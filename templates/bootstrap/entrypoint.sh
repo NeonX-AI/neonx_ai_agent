@@ -5,9 +5,6 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 export SCRIPT_DIR
 
-# Fix CRLF line endings (Windows compatibility)
-find "$SCRIPT_DIR" -name "*.sh" -exec sed -i 's/\r$//' {} \;
-
 # 1. Install system dependencies
 . "$SCRIPT_DIR/modules/nano/install.sh"
 . "$SCRIPT_DIR/modules/jq/install.sh"
