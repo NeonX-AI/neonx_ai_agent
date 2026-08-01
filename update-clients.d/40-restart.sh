@@ -3,6 +3,12 @@ set -euo pipefail
 
 source "$SCRIPT_DIR/update-clients.d/00-common.sh"
 
+# Create external network if it doesn't exist
+if ! docker network inspect neonx-network >/dev/null 2>&1; then
+    echo ">>> Creating external network: neonx-network"
+    sudo docker network create neonx-network
+fi
+
 if [ "$RESTART_CONTAINERS" = true ]; then
     echo ">>> Restarting docker containers..."
     echo ""
