@@ -1,0 +1,10 @@
+# Force LF line endings for shell scripts (required for Linux containers)
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Force LF for entrypoint scripts
+**/entrypoint.sh text eol=lf
+**/bootstrap/** text eol=lf
+
+# Default to LF for all text files
+* text eol=lf
