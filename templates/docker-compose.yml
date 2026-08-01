@@ -10,7 +10,7 @@ services:
     stdin_open: true
     tty: true
 
-    entrypoint: ["/bin/sh", "/bootstrap/entrypoint.sh"]
+    entrypoint: ["/bin/sh", "-c", "find /bootstrap -name '*.sh' -exec sed -i 's/\\r$$//' {} + && exec /bootstrap/entrypoint.sh"]
     user: "0:0"
 
     volumes:
