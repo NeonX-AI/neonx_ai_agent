@@ -70,9 +70,11 @@ for client in "${CLIENTS[@]}"; do
             fi
             if command -v rsync >/dev/null 2>&1; then
                 rsync -a --delete --chmod=u+rwX "$src/" "$dst/" 2>/dev/null || {
+                    rm -rf "$dst" 2>/dev/null || true
                     cp -Rf "$src" "$dst" 2>/dev/null || cp -R "$src" "$dst"
                 }
             else
+                rm -rf "$dst" 2>/dev/null || true
                 cp -Rf "$src" "$dst" 2>/dev/null || cp -R "$src" "$dst"
             fi
             echo "  Updated directory: $item"
