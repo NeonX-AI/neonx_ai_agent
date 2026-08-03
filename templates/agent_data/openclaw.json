@@ -5,7 +5,8 @@
   "plugins": {
     "enabled": true,
     "allow": [
-      "openclaw-message-listener"
+      "openclaw-message-listener",
+      "active-memory"
     ],
     "deny": [],
     "load": {
@@ -14,6 +15,9 @@
     "slots": {},
     "entries": {
       "openclaw-message-listener": {
+        "enabled": true
+      },
+      "active-memory": {
         "enabled": true
       }
     }

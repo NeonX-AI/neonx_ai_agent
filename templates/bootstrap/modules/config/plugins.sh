@@ -38,4 +38,11 @@ if [ -f "$CONFIG" ]; then
     .plugins.allow |= (. + [$plugin] | unique)
     ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
     echo "Ensured openclaw-message-listener plugin is enabled and allowed"
+
+    # Enable active-memory plugin
+    jq '
+    .plugins.entries."active-memory" = {enabled: true} |
+    .plugins.allow |= (. + ["active-memory"] | unique)
+    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Ensured active-memory plugin is enabled and allowed"
 fi
