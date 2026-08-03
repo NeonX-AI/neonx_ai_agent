@@ -44,7 +44,8 @@
           "alias": "neonx-3.0-plus"
         }
       }
-    }
+    },
+    "thinkingDefault": "off"
   },
   "session": {
     "dmScope": "per-channel-peer"
