@@ -32,22 +32,23 @@ if [ -n "$FACEBOOK_PAGE_ID" ]; then
     update_or_append "$ENV_FILE" "FACEBOOK_PAGE_ACCESS_TOKEN" "$FACEBOOK_PAGE_ACCESS_TOKEN"
 fi
 
-# Set MODEL in format provider/model (e.g., qltech/neonx-3.0-plus)
-MODEL="neonx/$MODEL_NAME"
-update_or_append "$ENV_FILE" "MODEL" "$MODEL"
+# Set MODEL in format provider/model (e.g., qltech/qwen3-coder:30b)
+update_or_append "$ENV_FILE" "MODEL" "$PROVIDER_AND_MODEL"
 
 echo ">>> Updating openclaw.json with model: $MODEL_NAME"
 OPENCLAW_JSON="$CLIENT_DIR/agent_data/openclaw.json"
 if [ -f "$OPENCLAW_JSON" ]; then
-    # Provider is hardcoded as "neonx"
-    PROVIDER="neonx"
-    MODEL_ID="$PROVIDER/$MODEL_NAME"
+    # Use the provider from PROVIDER_AND_MODEL (which could be "neonx/model-name" or "qltech/qwen3-coder:30b")
+    MODEL_ID="$PROVIDER_AND_MODEL"
+    
+    # Extract just the model name part for alias
+    MODEL_NAME_PART="${MODEL_ID##*/}"
     
     # Update agents.defaults.model.primary
     jq --arg model "$MODEL_ID" '.agents.defaults.model.primary = $model' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
     
     # Update agents.defaults.models
-    jq --arg model "$MODEL_ID" --arg alias "$MODEL_NAME" '.agents.defaults.models = {($model): {"alias": $alias}}' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
+    jq --arg model "$MODEL_ID" --arg alias "$MODEL_NAME_PART" '.agents.defaults.models = {($model): {"alias": $alias}}' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
     
     echo "  ✓ Model configured: $MODEL_NAME"
 fi

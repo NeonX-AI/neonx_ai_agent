@@ -62,7 +62,20 @@ fi
 read -rp "Enter FACEBOOK_PAGE_ID (leave empty to skip): " FACEBOOK_PAGE_ID
 read -rp "Enter FACEBOOK_PAGE_ACCESS_TOKEN (leave empty to skip): " FACEBOOK_PAGE_ACCESS_TOKEN
 
-read -rp "Enter MODEL_NAME [neonx-3.0-plus]: " MODEL_NAME
-MODEL_NAME="${MODEL_NAME:-neonx-3.0-plus}"
+read -rp "Enter MODEL_NAME [neonx/neonx-3.0-coder]: " MODEL_NAME
+MODEL_NAME="${MODEL_NAME:-neonx/neonx-3.0-coder}"
 
-export CLIENT_NAME BASE_URL API_KEY TELEGRAM_BOT_TOKEN FACEBOOK_APP_SECRET FACEBOOK_VERIFY_TOKEN FACEBOOK_PAGE_ID FACEBOOK_PAGE_ACCESS_TOKEN MODEL_NAME
+# Check if the model name contains a provider (has a slash)
+if [[ "$MODEL_NAME" == */* ]]; then
+    # Model name already includes provider, use it as-is
+    PROVIDER_AND_MODEL="$MODEL_NAME"
+    echo "Using specified provider/model: $PROVIDER_AND_MODEL"
+else
+    # No provider specified, ask user for provider or use default
+    read -rp "Enter PROVIDER [neonx]: " PROVIDER
+    PROVIDER="${PROVIDER:-neonx}"
+    PROVIDER_AND_MODEL="$PROVIDER/$MODEL_NAME"
+    echo "Using provider/model: $PROVIDER_AND_MODEL"
+fi
+
+export CLIENT_NAME BASE_URL API_KEY TELEGRAM_BOT_TOKEN FACEBOOK_APP_SECRET FACEBOOK_VERIFY_TOKEN FACEBOOK_PAGE_ID FACEBOOK_PAGE_ACCESS_TOKEN MODEL_NAME PROVIDER_AND_MODEL

@@ -37,15 +37,14 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "neonx/neonx-3.0-plus"
+        "primary": "neonx/neonx-3.0-coder"
       },
       "models": {
-        "neonx/neonx-3.0-plus": {
-          "alias": "neonx-3.0-plus"
+        "neonx/neonx-3.0-coder": {
+          "alias": "neonx-3.0-coder"
         }
       }
-    },
-    "thinkingDefault": "off"
+    }
   },
   "session": {
     "dmScope": "per-channel-peer"
@@ -59,8 +58,8 @@
         "apiKey": "sk-aea5c2d612c2e3dd-qe79fw-bedefcc3",
         "models": [
           {
-            "id": "neonx-3.0-plus",
-            "name": "neonx-3.0-plus (Custom Provider)",
+            "id": "neonx-3.0-coder",
+            "name": "neonx-3.0-coder (Custom Provider)",
             "contextWindow": 128000,
             "maxTokens": 4096,
             "input": [
