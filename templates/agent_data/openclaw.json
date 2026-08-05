@@ -78,6 +78,20 @@
       }
     }
   },
+  "mcp": {
+    "servers": {
+      "autodesk-fusion": {
+        "url": "http://host.docker.internal:27182/mcp",
+        "transport": "streamable-http",
+        "enabled": true,
+        "connectionTimeoutMs": 5000,
+        "requestTimeoutMs": 60000,
+        "headers": {
+          "Host": "127.0.0.1:27182"
+        }
+      }
+    }
+  },
   "wizard": {
     "lastRunAt": "2026-07-22T15:36:26.993Z",
     "lastRunVersion": "2026.7.1",

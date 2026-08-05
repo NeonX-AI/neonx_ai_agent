@@ -16,6 +16,21 @@ Do not manually reread startup files unless:
 2. The provided context is missing something you need
 3. You need a deeper follow-up read beyond the provided startup context
 
+**ALWAYS READ**: `KNOWLEDGE.md` at session start to understand your available capabilities.
+
+## Skills & Knowledge
+
+**IMPORTANT**: Always read `KNOWLEDGE.md` at session start to know available skills and knowledge.
+
+When user requests a specific task:
+1. Check `KNOWLEDGE.md` to see if a matching skill exists
+2. If a skill matches → **YOU MUST READ** `skills/<skill-name>/SKILL.md` before proceeding
+3. Follow the instructions in the skill file (connection, API, pitfalls, etc.)
+
+**CRITICAL**: You have the ability to connect to external services via `curl` from within the container. The skill files contain complete connection details including URLs, headers, and handshake sequences.
+
+**Example**: User asks to draw 3D in Fusion 360 → Read `skills/autodesk-fusion/SKILL.md` to get MCP connection details, then use `curl` to connect to the MCP server at `http://host.docker.internal:27182/mcp`.
+
 ## Memory
 
 You wake up fresh each session. These files are your continuity:
