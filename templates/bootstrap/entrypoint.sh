@@ -25,6 +25,7 @@ export SCRIPT_DIR
 # 6. Setup other plugins
 . "$SCRIPT_DIR/modules/plugins/telegram.sh"
 . "$SCRIPT_DIR/modules/plugins/zalo.sh"
+. "$SCRIPT_DIR/modules/plugins/codex.sh"
 
 # 7. Start gateway
 . "$SCRIPT_DIR/modules/gateway/start.sh"

@@ -4,6 +4,12 @@ sudo ./create-client.sh
 # Update clients
 sudo ./update-clients.sh
 
+# Api Type
+## Api env chấp nhận 3 giá trị:
+openai-completions (OpenAI-compatible)
+openai-responses
+anthropic-messages (Claude)
+
 # Docker iptables - Chặn port sau khi config xong
 
 ---

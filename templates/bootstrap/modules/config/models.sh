@@ -48,8 +48,7 @@ if [ -n "${MODEL:-}" ]; then
            "contextWindow": 128000,
            "maxTokens": 4096,
            "input": ["text", "image"],
-           "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
-           "reasoning": false
+           "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0}
        }]
        ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
 
