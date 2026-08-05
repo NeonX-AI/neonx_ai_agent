@@ -53,4 +53,13 @@ if [ -f "$OPENCLAW_JSON" ]; then
     echo "  ✓ Model configured: $MODEL_NAME"
 fi
 
+# Sync skills from templates
+SKILLS_DIR="$SCRIPT_DIR/templates/skills"
+if [ -d "$SKILLS_DIR" ]; then
+    echo ">>> Syncing skills to client"
+    mkdir -p "$CLIENT_DIR/agent_data/skills"
+    cp -R "$SKILLS_DIR/"* "$CLIENT_DIR/agent_data/skills/" 2>/dev/null || true
+    echo "  ✓ Skills synced"
+fi
+
 export CLIENT_DIR ENV_FILE

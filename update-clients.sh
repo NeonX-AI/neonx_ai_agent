@@ -11,5 +11,8 @@ export SCRIPT_DIR
 # 2. Update clients from templates
 . "$SCRIPT_DIR/update-clients.d/30-update.sh"
 
-# 3. Restart containers
+# 3. Sync skills to clients
+. "$SCRIPT_DIR/update-clients.d/35-sync-skills.sh"
+
+# 4. Restart containers
 . "$SCRIPT_DIR/update-clients.d/40-restart.sh"
