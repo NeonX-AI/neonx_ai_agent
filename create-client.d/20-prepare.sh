@@ -43,15 +43,9 @@ OPENCLAW_JSON="$CLIENT_DIR/agent_data/openclaw.json"
 if [ -f "$OPENCLAW_JSON" ]; then
     # Use the provider from PROVIDER_AND_MODEL (which could be "neonx/model-name" or "qltech/qwen3-coder:30b")
     MODEL_ID="$PROVIDER_AND_MODEL"
-    
-    # Extract just the model name part for alias
-    MODEL_NAME_PART="${MODEL_ID##*/}"
-    
+
     # Update agents.defaults.model.primary
     jq --arg model "$MODEL_ID" '.agents.defaults.model.primary = $model' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
-    
-    # Update agents.defaults.models
-    jq --arg model "$MODEL_ID" --arg alias "$MODEL_NAME_PART" '.agents.defaults.models = {($model): {"alias": $alias}}' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
 
     # Update provider API protocol (openai-completions | openai-responses | anthropic-messages)
     PROVIDER_PART="${MODEL_ID%%/*}"

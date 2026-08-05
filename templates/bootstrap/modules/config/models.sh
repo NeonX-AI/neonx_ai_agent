@@ -38,7 +38,7 @@ if [ -n "${MODEL:-}" ]; then
        --arg api "$API" \
        '
        .agents.defaults.model.primary = $modelId |
-       .agents.defaults.models = {($modelId): {"alias": $modelName}} |
+       del(.agents.defaults.models) |
        .models.providers[$provider].baseUrl = $baseUrl |
        .models.providers[$provider].apiKey = $apiKey |
        .models.providers[$provider].api = $api |
