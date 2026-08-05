@@ -35,6 +35,9 @@ fi
 # Set MODEL in format provider/model (e.g., qltech/qwen3-coder:30b)
 update_or_append "$ENV_FILE" "MODEL" "$PROVIDER_AND_MODEL"
 
+# Set API protocol (openai-completions | openai-responses | anthropic-messages)
+update_or_append "$ENV_FILE" "API" "$API"
+
 echo ">>> Updating openclaw.json with model: $MODEL_NAME"
 OPENCLAW_JSON="$CLIENT_DIR/agent_data/openclaw.json"
 if [ -f "$OPENCLAW_JSON" ]; then
@@ -49,8 +52,12 @@ if [ -f "$OPENCLAW_JSON" ]; then
     
     # Update agents.defaults.models
     jq --arg model "$MODEL_ID" --arg alias "$MODEL_NAME_PART" '.agents.defaults.models = {($model): {"alias": $alias}}' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
-    
-    echo "  ✓ Model configured: $MODEL_NAME"
+
+    # Update provider API protocol (openai-completions | openai-responses | anthropic-messages)
+    PROVIDER_PART="${MODEL_ID%%/*}"
+    jq --arg provider "$PROVIDER_PART" --arg api "$API" '.models.providers[$provider].api = $api' "$OPENCLAW_JSON" > "$OPENCLAW_JSON.tmp" && mv "$OPENCLAW_JSON.tmp" "$OPENCLAW_JSON"
+
+    echo "  ✓ Model configured: $MODEL_NAME (api: $API)"
 fi
 
 # Sync skills from templates

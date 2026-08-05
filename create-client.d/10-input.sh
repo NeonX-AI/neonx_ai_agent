@@ -65,6 +65,16 @@ read -rp "Enter FACEBOOK_PAGE_ACCESS_TOKEN (leave empty to skip): " FACEBOOK_PAG
 read -rp "Enter MODEL_NAME [neonx/neonx-3.0-coder]: " MODEL_NAME
 MODEL_NAME="${MODEL_NAME:-neonx/neonx-3.0-coder}"
 
+read -rp "Enter API protocol (openai-completions | openai-responses | anthropic-messages) [openai-completions]: " API
+API="${API:-openai-completions}"
+case "$API" in
+    openai-completions|openai-responses|anthropic-messages) ;;
+    *)
+        echo "Error: Invalid API protocol '$API'. Must be one of: openai-completions, openai-responses, anthropic-messages."
+        exit 1
+        ;;
+esac
+
 # Check if the model name contains a provider (has a slash)
 if [[ "$MODEL_NAME" == */* ]]; then
     # Model name already includes provider, use it as-is
@@ -78,4 +88,4 @@ else
     echo "Using provider/model: $PROVIDER_AND_MODEL"
 fi
 
-export CLIENT_NAME BASE_URL API_KEY TELEGRAM_BOT_TOKEN FACEBOOK_APP_SECRET FACEBOOK_VERIFY_TOKEN FACEBOOK_PAGE_ID FACEBOOK_PAGE_ACCESS_TOKEN MODEL_NAME PROVIDER_AND_MODEL
+export CLIENT_NAME BASE_URL API_KEY TELEGRAM_BOT_TOKEN FACEBOOK_APP_SECRET FACEBOOK_VERIFY_TOKEN FACEBOOK_PAGE_ID FACEBOOK_PAGE_ACCESS_TOKEN MODEL_NAME PROVIDER_AND_MODEL API

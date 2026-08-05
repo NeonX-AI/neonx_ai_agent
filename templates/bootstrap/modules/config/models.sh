@@ -1,9 +1,13 @@
 #!/bin/sh
 # Module: models configuration
 # Updates model from MODEL environment variable
+# API env var selects the provider protocol: openai-completions | openai-responses | anthropic-messages
 
 CONFIG_PATH="/home/node/.openclaw"
 CONFIG="$CONFIG_PATH/openclaw.json"
+
+# Provider API protocol (openai-completions for OpenAI-compatible, anthropic-messages for Claude)
+API="${API:-openai-completions}"
 
 # Check if MODEL env var exists
 if [ -n "${MODEL:-}" ]; then
@@ -31,11 +35,13 @@ if [ -n "${MODEL:-}" ]; then
        --arg modelName "$MODEL_NAME" \
        --arg baseUrl "${BASE_URL:-http://ai_gateway:20128/v1}" \
        --arg apiKey "${API_KEY:-}" \
+       --arg api "$API" \
        '
        .agents.defaults.model.primary = $modelId |
        .agents.defaults.models = {($modelId): {"alias": $modelName}} |
        .models.providers[$provider].baseUrl = $baseUrl |
        .models.providers[$provider].apiKey = $apiKey |
+       .models.providers[$provider].api = $api |
        .models.providers[$provider].models = [{
            "id": $modelName,
            "name": ($modelName + " (Custom Provider)"),
