@@ -29,6 +29,37 @@ if [ -d "$PLUGIN_DIR" ]; then
     done
 fi
 
+# Remove leftover install staging dirs (from interrupted `openclaw plugins install`)
+for stage_dir in "$CONFIG_PATH/extensions"/.openclaw-install-stage-*; do
+    if [ -d "$stage_dir" ]; then
+        echo "Removing install staging dir: $stage_dir"
+        rm -rf "$stage_dir"
+    fi
+done
+
+# Remove stale facebook install records from the installed-plugin index.
+# Old records (from `openclaw plugins install`) plus the extensions/ dir scan
+# cause "duplicate plugin id" warnings since we now ship the plugin locally.
+if command -v node >/dev/null 2>&1 && [ -f "$CONFIG_PATH/state/openclaw.sqlite" ]; then
+    if node --input-type=module <<'NODE_EOF' 2>/dev/null
+import { DatabaseSync } from "node:sqlite";
+const db = new DatabaseSync("/home/node/.openclaw/state/openclaw.sqlite");
+const row = db.prepare("SELECT install_records_json FROM installed_plugin_index WHERE index_key='installed-plugin-index'").get();
+if (row) {
+    const records = JSON.parse(row.install_records_json);
+    if (records.facebook) {
+        delete records.facebook;
+        db.prepare("UPDATE installed_plugin_index SET install_records_json=? WHERE index_key='installed-plugin-index'")
+            .run(JSON.stringify(records));
+        console.log("cleaned");
+    }
+}
+NODE_EOF
+    then
+        echo "Cleaned stale facebook install records"
+    fi
+fi
+
 # Copy bundled plugin from mounted /extensions (always refresh to bundled version)
 echo "Setting up facebook plugin from $PLUGIN_SOURCE..."
 if [ ! -f "$PLUGIN_SOURCE/package.json" ]; then
