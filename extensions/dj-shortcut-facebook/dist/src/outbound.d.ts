@@ -12,7 +12,7 @@ export declare const messengerMessageAdapter: {
     };
     readonly send: {
         readonly text: ({ cfg, to, text, accountId }: import("openclaw/plugin-sdk/channel-message").ChannelMessageSendTextContext<import("openclaw/plugin-sdk/channel-core").OpenClawConfig>) => Promise<ChannelMessageSendResult>;
-        readonly media: ({ cfg, to, text, mediaUrl, accountId }: import("openclaw/plugin-sdk/channel-message").ChannelMessageSendMediaContext<import("openclaw/plugin-sdk/channel-core").OpenClawConfig>) => Promise<{
+        readonly media: ({ cfg, to, text, mediaUrl, accountId, mediaReadFile }: import("openclaw/plugin-sdk/channel-message").ChannelMessageSendMediaContext<import("openclaw/plugin-sdk/channel-core").OpenClawConfig>) => Promise<{
             messageId: string;
             receipt: import("openclaw/plugin-sdk/channel-message").MessageReceipt;
         }>;

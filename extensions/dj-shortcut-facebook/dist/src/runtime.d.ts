@@ -4,6 +4,7 @@ type MessengerChannelRuntime = {
     probeMessengerPage?: typeof import("./probe.js").probeMessengerPage;
     resolveMessengerAccount?: typeof import("./accounts.js").resolveMessengerAccount;
     sendMessengerImage?: typeof import("./send.js").sendMessengerImage;
+    sendMessengerImageFile?: typeof import("./send.js").sendMessengerImageFile;
     sendMessengerSenderAction?: typeof import("./send.js").sendMessengerSenderAction;
     sendMessengerText?: typeof import("./send.js").sendMessengerText;
     sendMessengerTextAndImage?: typeof import("./send.js").sendMessengerTextAndImage;

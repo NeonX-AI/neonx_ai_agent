@@ -61,7 +61,7 @@ export const messengerOutboundAdapter = {
                 (await loadMessengerRuntime()).sendMessengerText;
             return await sendText(to, text, { cfg, accountId: accountId ?? undefined });
         },
-        sendMedia: async ({ cfg, to, text, mediaUrl, accountId }) => {
+        sendMedia: async ({ cfg, to, text, mediaUrl, accountId, mediaReadFile }) => {
             if (!mediaUrl) {
                 throw new Error("Messenger media send requires a mediaUrl");
             }
@@ -70,6 +70,7 @@ export const messengerOutboundAdapter = {
             const result = await sendTextAndImage(to, text, mediaUrl, {
                 cfg,
                 accountId: accountId ?? undefined,
+                readFile: mediaReadFile,
             });
             return { messageId: result.image.messageId, receipt: result.image.receipt };
         },
@@ -104,7 +105,7 @@ export const messengerMessageAdapter = defineChannelMessageAdapter({
             });
             return toMessengerMessageSendResult(result);
         },
-        media: async ({ cfg, to, text, mediaUrl, accountId }) => {
+        media: async ({ cfg, to, text, mediaUrl, accountId, mediaReadFile }) => {
             if (!mediaUrl) {
                 throw new Error("Messenger media send requires a mediaUrl");
             }
@@ -113,6 +114,7 @@ export const messengerMessageAdapter = defineChannelMessageAdapter({
             const result = await sendTextAndImage(to, text, mediaUrl, {
                 cfg,
                 accountId: accountId ?? undefined,
+                readFile: mediaReadFile,
             });
             return {
                 messageId: result.image.messageId,

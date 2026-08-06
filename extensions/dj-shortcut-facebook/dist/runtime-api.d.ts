@@ -4,7 +4,7 @@ export { buildChannelConfigSchema } from "openclaw/plugin-sdk/channel-config-sch
 export { setMessengerRuntime } from "./src/runtime.js";
 export { monitorMessengerProvider } from "./src/monitor.js";
 export { probeMessengerPage } from "./src/probe.js";
-export { sendMessengerImage, sendMessengerSenderAction, sendMessengerText, sendMessengerTextAndImage, } from "./src/send.js";
+export { isLocalImagePath, sendMessengerImage, sendMessengerImageFile, sendMessengerSenderAction, sendMessengerText, sendMessengerTextAndImage, } from "./src/send.js";
 export { listMessengerAccountIds, normalizeAccountId, resolveDefaultMessengerAccountId, resolveMessengerAccount, } from "./src/accounts.js";
 export { MessengerChannelConfigSchema, MessengerConfigSchema, type MessengerConfigSchemaType, } from "./src/config-schema.js";
 export type { MessengerConfig, MessengerProbeResult, MessengerSendResult, ResolvedMessengerAccount, } from "./src/types.js";
