@@ -35,14 +35,14 @@ services:
       FACEBOOK_PAGE_ACCESS_TOKEN: ${FACEBOOK_PAGE_ACCESS_TOKEN:-}
       STACK_NAME: ${STACK_NAME:-neonx-ai-agent}
 
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 1G
-        reservations:
-          cpus: "0.25"
-          memory: 256M
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "1.0"
+    #       memory: 1G
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: 256M
 
     # Default: publish ports to host
     # For clients running multiple containers on same host, replace with:
