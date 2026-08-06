@@ -4,6 +4,7 @@ import { createRestrictSendersChannelSecurity } from "openclaw/plugin-sdk/channe
 import { createEmptyChannelDirectoryAdapter } from "openclaw/plugin-sdk/directory-runtime";
 import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
 import { resolveMessengerAccount } from "./accounts.js";
+import { messengerMessageActions } from "./actions.js";
 import { messengerChannelPluginCommon } from "./channel-shared.js";
 import { messengerGatewayAdapter } from "./gateway.js";
 import { FACEBOOK_CHANNEL_ID, stripFacebookTargetPrefix } from "./naming.js";
@@ -48,6 +49,7 @@ export const messengerPlugin = createChatChannelPlugin({
         status: messengerStatusAdapter,
         gateway: messengerGatewayAdapter,
         message: messengerMessageAdapter,
+        actions: messengerMessageActions,
     },
     pairing: {
         text: {
