@@ -61,14 +61,17 @@ export const messengerOutboundAdapter = {
                 (await loadMessengerRuntime()).sendMessengerText;
             return await sendText(to, text, { cfg, accountId: accountId ?? undefined });
         },
-        sendMedia: async ({ cfg, to, mediaUrl, accountId }) => {
+        sendMedia: async ({ cfg, to, text, mediaUrl, accountId }) => {
             if (!mediaUrl) {
                 throw new Error("Messenger media send requires a mediaUrl");
             }
-            const sendImage = getMessengerRuntime().channel.facebook?.sendMessengerImage ??
-                (await loadMessengerRuntime()).sendMessengerImage;
-            const result = await sendImage(to, mediaUrl, { cfg, accountId: accountId ?? undefined });
-            return { messageId: result.messageId, receipt: result.receipt };
+            const sendTextAndImage = getMessengerRuntime().channel.facebook?.sendMessengerTextAndImage ??
+                (await loadMessengerRuntime()).sendMessengerTextAndImage;
+            const result = await sendTextAndImage(to, text, mediaUrl, {
+                cfg,
+                accountId: accountId ?? undefined,
+            });
+            return { messageId: result.image.messageId, receipt: result.image.receipt };
         },
     }),
 };
@@ -101,16 +104,19 @@ export const messengerMessageAdapter = defineChannelMessageAdapter({
             });
             return toMessengerMessageSendResult(result);
         },
-        media: async ({ cfg, to, mediaUrl, accountId }) => {
-            const sendImage = getMessengerRuntime().channel.facebook?.sendMessengerImage ??
-                (await loadMessengerRuntime()).sendMessengerImage;
-            const result = await sendImage(to, mediaUrl, {
+        media: async ({ cfg, to, text, mediaUrl, accountId }) => {
+            if (!mediaUrl) {
+                throw new Error("Messenger media send requires a mediaUrl");
+            }
+            const sendTextAndImage = getMessengerRuntime().channel.facebook?.sendMessengerTextAndImage ??
+                (await loadMessengerRuntime()).sendMessengerTextAndImage;
+            const result = await sendTextAndImage(to, text, mediaUrl, {
                 cfg,
                 accountId: accountId ?? undefined,
             });
             return {
-                messageId: result.messageId,
-                receipt: result.receipt,
+                messageId: result.image.messageId,
+                receipt: result.image.receipt,
             };
         },
     },

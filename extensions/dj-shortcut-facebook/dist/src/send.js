@@ -179,6 +179,18 @@ export async function sendMessengerImage(to, imageUrl, opts) {
         receipt: createMessengerSendReceipt({ messageId, recipientId }),
     };
 }
+/**
+ * Sends a text caption and an image as separate Messenger messages.
+ * The Messenger Send API does not allow `text` and `attachment` in one
+ * message, so a non-empty caption is delivered first, then the image.
+ * Empty captions are skipped and only the image is sent.
+ */
+export async function sendMessengerTextAndImage(to, text, imageUrl, opts) {
+    const caption = text.trim();
+    const textResult = caption ? await sendMessengerText(to, caption, opts) : undefined;
+    const imageResult = await sendMessengerImage(to, imageUrl, opts);
+    return { text: textResult, image: imageResult };
+}
 export async function sendMessengerSenderAction(to, senderAction, opts) {
     const account = resolveMessengerAccount({ cfg: opts.cfg, accountId: opts.accountId });
     if (!account.pageId.trim()) {

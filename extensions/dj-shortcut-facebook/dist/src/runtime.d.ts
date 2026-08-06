@@ -6,6 +6,7 @@ type MessengerChannelRuntime = {
     sendMessengerImage?: typeof import("./send.js").sendMessengerImage;
     sendMessengerSenderAction?: typeof import("./send.js").sendMessengerSenderAction;
     sendMessengerText?: typeof import("./send.js").sendMessengerText;
+    sendMessengerTextAndImage?: typeof import("./send.js").sendMessengerTextAndImage;
 };
 type MessengerRuntime = PluginRuntime & {
     channel: PluginRuntime["channel"] & {
