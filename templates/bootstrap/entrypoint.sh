@@ -23,6 +23,9 @@ export SCRIPT_DIR
 # 5. Configure models
 . "$SCRIPT_DIR/modules/config/models.sh"
 
+# 5b. Chatbot mode (CHAT_BOT=true -> hide skills + stub KNOWLEDGE.md for speed)
+. "$SCRIPT_DIR/modules/config/chatbot.sh"
+
 # 6. Setup other plugins
 . "$SCRIPT_DIR/modules/plugins/telegram.sh"
 . "$SCRIPT_DIR/modules/plugins/zalo.sh"
