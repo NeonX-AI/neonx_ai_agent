@@ -83,6 +83,16 @@
         "headers": {
           "Host": "127.0.0.1:27182"
         }
+      },
+      "autocad": {
+        "url": "http://host.docker.internal:8000/mcp",
+        "transport": "streamable-http",
+        "enabled": true,
+        "connectionTimeoutMs": 5000,
+        "requestTimeoutMs": 60000,
+        "headers": {
+          "Host": "127.0.0.1:8000"
+        }
       }
     }
   },

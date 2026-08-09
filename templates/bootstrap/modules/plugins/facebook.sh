@@ -99,7 +99,20 @@ jq --arg pid "$FACEBOOK_PLUGIN_ID" '
 ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
 echo "Ensured plugin $FACEBOOK_PLUGIN_ID is enabled"
 
-# Configure Facebook channel from environment variables (injected from .env.meta)
+# Configure Facebook channel from environment variables (injected from .env / .env.meta)
+#
+# Default fanpage (account "default"):
+#   FACEBOOK_PAGE_ID, FACEBOOK_PAGE_ACCESS_TOKEN
+#   FACEBOOK_APP_SECRET, FACEBOOK_VERIFY_TOKEN   (shared, from .env.meta)
+#
+# Additional fanpages (accounts "page2", "page3", ...):
+#   FACEBOOK_PAGE_<N>_ID, FACEBOOK_PAGE_<N>_ACCESS_TOKEN
+#   FACEBOOK_PAGE_<N>_APP_SECRET, FACEBOOK_PAGE_<N>_VERIFY_TOKEN  (optional,
+#       fall back to the shared FACEBOOK_APP_SECRET / FACEBOOK_VERIFY_TOKEN)
+#   FACEBOOK_PAGE_<N>_NAME                       (optional display name)
+#
+# All accounts share one webhook path (/facebook/webhook); Meta routes events
+# by page id, so each fanpage only needs its own webhook subscription.
 if [ -n "${FACEBOOK_PAGE_ID:-}" ] && [ -n "${FACEBOOK_PAGE_ACCESS_TOKEN:-}" ]; then
     jq \
         --arg pageId "$FACEBOOK_PAGE_ID" \
@@ -107,7 +120,7 @@ if [ -n "${FACEBOOK_PAGE_ID:-}" ] && [ -n "${FACEBOOK_PAGE_ACCESS_TOKEN:-}" ]; t
         --arg appSecret "${FACEBOOK_APP_SECRET:-}" \
         --arg verifyToken "${FACEBOOK_VERIFY_TOKEN:-}" \
         '
-        .channels.facebook = {
+        .channels.facebook = ((.channels.facebook // {}) + {
             enabled: true,
             pageId: $pageId,
             pageAccessToken: $pageAccessToken,
@@ -115,11 +128,69 @@ if [ -n "${FACEBOOK_PAGE_ID:-}" ] && [ -n "${FACEBOOK_PAGE_ACCESS_TOKEN:-}" ]; t
             verifyToken: $verifyToken,
             dmPolicy: "open",
             allowFrom: ["*"]
-        }
+        })
         ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-    echo "Configured Facebook channel from environment variables"
-    
+    echo "Configured default Facebook fanpage from environment variables"
+
+    # Keep shared app credentials available for extra fanpages below
+    FACEBOOK_APP_SECRET_SHARED="${FACEBOOK_APP_SECRET:-}"
+    FACEBOOK_VERIFY_TOKEN_SHARED="${FACEBOOK_VERIFY_TOKEN:-}"
+
     # Remove sensitive environment variables after use
     unset FACEBOOK_APP_SECRET FACEBOOK_VERIFY_TOKEN FACEBOOK_PAGE_ID FACEBOOK_PAGE_ACCESS_TOKEN
     echo "Removed sensitive environment variables"
+else
+    # No default fanpage configured; still allow shared credentials for extras
+    FACEBOOK_APP_SECRET_SHARED="${FACEBOOK_APP_SECRET:-}"
+    FACEBOOK_VERIFY_TOKEN_SHARED="${FACEBOOK_VERIFY_TOKEN:-}"
 fi
+
+# Additional fanpages: FACEBOOK_PAGE_<N>_* env vars (N = 2..10)
+# The plugin only reads env vars for the default account, so extra fanpages
+# must be written into channels.facebook.accounts.<id> (each needs enabled:true).
+FB_EXTRA_COUNT=0
+n=2
+while [ "$n" -le 10 ]; do
+    eval "page_id=\${FACEBOOK_PAGE_${n}_ID:-}"
+    eval "page_token=\${FACEBOOK_PAGE_${n}_ACCESS_TOKEN:-}"
+    if [ -n "$page_id" ] && [ -n "$page_token" ]; then
+        eval "page_secret=\${FACEBOOK_PAGE_${n}_APP_SECRET:-\${FACEBOOK_APP_SECRET_SHARED:-}}"
+        eval "page_verify=\${FACEBOOK_PAGE_${n}_VERIFY_TOKEN:-\${FACEBOOK_VERIFY_TOKEN_SHARED:-}}"
+        eval "page_name=\${FACEBOOK_PAGE_${n}_NAME:-}"
+
+        jq \
+            --arg acctId "page$n" \
+            --arg pageId "$page_id" \
+            --arg pageAccessToken "$page_token" \
+            --arg appSecret "$page_secret" \
+            --arg verifyToken "$page_verify" \
+            --arg name "$page_name" \
+            '
+            .channels.facebook = (.channels.facebook // {}) |
+            .channels.facebook.accounts[$acctId] = (
+                {
+                    enabled: true,
+                    pageId: $pageId,
+                    pageAccessToken: $pageAccessToken,
+                    appSecret: $appSecret,
+                    verifyToken: $verifyToken,
+                    dmPolicy: "open",
+                    allowFrom: ["*"]
+                }
+                + (if $name != "" then {name: $name} else {} end)
+            )
+            ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Configured extra Facebook fanpage: page$n (id=$page_id)"
+        FB_EXTRA_COUNT=$((FB_EXTRA_COUNT + 1))
+
+        # Remove sensitive environment variables after use
+        unset "FACEBOOK_PAGE_${n}_ID" "FACEBOOK_PAGE_${n}_ACCESS_TOKEN" \
+              "FACEBOOK_PAGE_${n}_APP_SECRET" "FACEBOOK_PAGE_${n}_VERIFY_TOKEN" \
+              "FACEBOOK_PAGE_${n}_NAME"
+    fi
+    n=$((n + 1))
+done
+if [ "$FB_EXTRA_COUNT" -gt 0 ]; then
+    echo "Configured $FB_EXTRA_COUNT extra Facebook fanpage(s)"
+fi
+unset FACEBOOK_APP_SECRET_SHARED FACEBOOK_VERIFY_TOKEN_SHARED
