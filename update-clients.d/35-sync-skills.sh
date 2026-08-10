@@ -3,46 +3,86 @@ set -euo pipefail
 
 source "$SCRIPT_DIR/update-clients.d/00-common.sh"
 
-SKILLS_DIR="$SCRIPT_DIR/templates/skills"
+# Skill sources (mirrored into each client's agent_data/skills/):
+#   1. extensions/text-to-cad/skills — the text-to-cad skill library
+#      (earthtojake/text-to-cad), single source of truth for CAD/robotics skills
+#   2. templates/skills — extra standalone skills (e.g. autodesk-fusion)
+TTC_SKILLS_DIR="$SCRIPT_DIR/extensions/text-to-cad/skills"
+EXTRA_SKILLS_DIR="$SCRIPT_DIR/templates/skills"
 
 echo ""
 echo ">>> Syncing skills to clients..."
 echo ""
 
-# Check if skills directory exists
-if [ ! -d "$SKILLS_DIR" ]; then
-    echo "  Warning: Skills directory not found: $SKILLS_DIR"
+if [ ! -d "$TTC_SKILLS_DIR" ] && [ ! -d "$EXTRA_SKILLS_DIR" ]; then
+    echo "  Warning: No skill sources found:"
+    echo "    - $TTC_SKILLS_DIR"
+    echo "    - $EXTRA_SKILLS_DIR"
     echo "  Skipping skills sync"
     echo ""
     exit 0
 fi
 
+sync_skill() {
+    local src="$1" dst="$2" name="$3"
+    rm -rf "$dst/$name"
+    if command -v rsync >/dev/null 2>&1; then
+        rsync -a --chmod=u+rwX "$src/$name/" "$dst/$name/"
+    else
+        cp -R "$src/$name" "$dst/$name"
+    fi
+}
+
 for client in "${CLIENTS[@]}"; do
     client_dir="$CLIENTS_DIR/$client"
     agent_data_dir="$client_dir/agent_data"
     skills_dst="$agent_data_dir/skills"
-    
+
     echo "Syncing skills to client: $client"
-    
+
     if [ ! -d "$agent_data_dir" ]; then
         echo "  Warning: Agent data directory not found for client '$client', skipping..."
         continue
     fi
-    
-    # Create skills directory if it doesn't exist
+
     mkdir -p "$skills_dst"
-    
-    # Copy all skills from templates, overwriting existing ones
-    if command -v rsync >/dev/null 2>&1; then
-        rsync -a --delete --chmod=u+rwX "$SKILLS_DIR/" "$skills_dst/" 2>/dev/null || \
-            cp -Rf "$SKILLS_DIR/"* "$skills_dst/" 2>/dev/null || true
-    else
-        # Remove existing skills and copy new ones
-        rm -rf "$skills_dst"/* 2>/dev/null || true
-        cp -Rf "$SKILLS_DIR/"* "$skills_dst/" 2>/dev/null || true
+
+    # Remove the legacy full text-to-cad repo clone (with .git, ~130MB).
+    # The skills are now synced individually from extensions/text-to-cad/skills.
+    if [ -d "$skills_dst/text-to-cad" ]; then
+        echo "  Removing legacy text-to-cad repo clone..."
+        rm -rf "$skills_dst/text-to-cad"
     fi
-    
-    echo "  ✓ Skills synced to client '$client'"
+
+    # Mirror semantics: drop client skills that no longer exist in any source
+    for d in "$skills_dst"/*/; do
+        [ -d "$d" ] || continue
+        name="$(basename "$d")"
+        if [ ! -d "$TTC_SKILLS_DIR/$name" ] && [ ! -d "$EXTRA_SKILLS_DIR/$name" ]; then
+            echo "  Removing stale skill: $name"
+            rm -rf "$skills_dst/$name"
+        fi
+    done
+
+    synced=0
+    if [ -d "$TTC_SKILLS_DIR" ]; then
+        for d in "$TTC_SKILLS_DIR"/*/; do
+            [ -d "$d" ] || continue
+            name="$(basename "$d")"
+            sync_skill "$TTC_SKILLS_DIR" "$skills_dst" "$name"
+            synced=$((synced + 1))
+        done
+    fi
+    if [ -d "$EXTRA_SKILLS_DIR" ]; then
+        for d in "$EXTRA_SKILLS_DIR"/*/; do
+            [ -d "$d" ] || continue
+            name="$(basename "$d")"
+            sync_skill "$EXTRA_SKILLS_DIR" "$skills_dst" "$name"
+            synced=$((synced + 1))
+        done
+    fi
+
+    echo "  ✓ Synced $synced skills to client '$client'"
     echo ""
 done
 

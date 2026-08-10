@@ -54,12 +54,28 @@ if [ -f "$OPENCLAW_JSON" ]; then
     echo "  ✓ Model configured: $MODEL_NAME (api: $API)"
 fi
 
-# Sync skills from templates
-SKILLS_DIR="$SCRIPT_DIR/templates/skills"
-if [ -d "$SKILLS_DIR" ]; then
+# Sync skills to the client.
+# Sources:
+#   1. extensions/text-to-cad/skills — text-to-cad skill library (earthtojake/text-to-cad)
+#   2. templates/skills — extra standalone skills (e.g. autodesk-fusion)
+TTC_SKILLS_DIR="$SCRIPT_DIR/extensions/text-to-cad/skills"
+EXTRA_SKILLS_DIR="$SCRIPT_DIR/templates/skills"
+if [ -d "$TTC_SKILLS_DIR" ] || [ -d "$EXTRA_SKILLS_DIR" ]; then
     echo ">>> Syncing skills to client"
     mkdir -p "$CLIENT_DIR/agent_data/skills"
-    cp -R "$SKILLS_DIR/"* "$CLIENT_DIR/agent_data/skills/" 2>/dev/null || true
+    for src_dir in "$TTC_SKILLS_DIR" "$EXTRA_SKILLS_DIR"; do
+        [ -d "$src_dir" ] || continue
+        for d in "$src_dir"/*/; do
+            [ -d "$d" ] || continue
+            name="$(basename "$d")"
+            rm -rf "$CLIENT_DIR/agent_data/skills/$name"
+            if command -v rsync >/dev/null 2>&1; then
+                rsync -a --chmod=u+rwX "$src_dir/$name/" "$CLIENT_DIR/agent_data/skills/$name/"
+            else
+                cp -R "$src_dir/$name" "$CLIENT_DIR/agent_data/skills/$name"
+            fi
+        done
+    done
     echo "  ✓ Skills synced"
 fi
 
