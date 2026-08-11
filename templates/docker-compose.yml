@@ -18,6 +18,8 @@ services:
       - ./projects:/home/node/.openclaw/projects
       - ./bootstrap:/bootstrap:ro
       - ../../extensions:/extensions:ro
+      # Persistent Codex CLI state (auth, sessions) for openclaw-codex-app-server
+      - codex_home:/home/node/.codex
     env_file:
       - .env
       - path: ../../.env.meta
@@ -35,6 +37,12 @@ services:
       FACEBOOK_PAGE_ACCESS_TOKEN: ${FACEBOOK_PAGE_ACCESS_TOKEN:-}
       CHAT_BOT: ${CHAT_BOT:-}
       STACK_NAME: ${STACK_NAME:-neonx-ai-agent}
+      # Codex CLI (used by openclaw-codex-app-server plugin)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CODEX_APP_SERVER_WORKSPACE_DIR: ${CODEX_APP_SERVER_WORKSPACE_DIR:-}
+      CODEX_APP_SERVER_MODEL: ${CODEX_APP_SERVER_MODEL:-}
+      CODEX_APP_SERVER_TRANSPORT: ${CODEX_APP_SERVER_TRANSPORT:-}
+      CODEX_APP_SERVER_URL: ${CODEX_APP_SERVER_URL:-}
 
     # deploy:
     #   resources:
@@ -61,3 +69,6 @@ services:
 networks:
   neonx-network:
     external: true
+
+volumes:
+  codex_home:

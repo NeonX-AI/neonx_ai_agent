@@ -31,6 +31,8 @@ export SCRIPT_DIR
 . "$SCRIPT_DIR/modules/plugins/zalo.sh"
 . "$SCRIPT_DIR/modules/plugins/codex.sh"
 . "$SCRIPT_DIR/modules/plugins/codex-skills.sh"
+. "$SCRIPT_DIR/modules/plugins/codex-provider.sh"
+. "$SCRIPT_DIR/modules/plugins/codex-app-server.sh"
 
 # 7. Start gateway
 . "$SCRIPT_DIR/modules/gateway/start.sh"

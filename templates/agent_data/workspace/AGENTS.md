@@ -31,6 +31,10 @@ When user requests a specific task:
 
 **Example**: User asks to draw 3D in Fusion 360 → Read `skills/autodesk-fusion/SKILL.md` to get MCP connection details, then use `curl` to connect to the MCP server at `http://host.docker.internal:27182/mcp`.
 
+## Codex Worker
+
+When the user explicitly asks to use or delegate work to Codex (for example “dùng Codex”, “use Codex”, or “Codex vẽ AutoCAD”), call the `codex_worker` tool with the complete task. Do not ask the user to run `/codex bind`, `/cas_resume`, or any terminal command. For CAD work, include the drawing requirements and instruct Codex to read `KNOWLEDGE.md` plus the matching skill before acting. Return the worker's result in the same conversation.
+
 ## Memory
 
 You wake up fresh each session. These files are your continuity:

@@ -1,9 +1,12 @@
 {
   "id": "openclaw-message-listener",
   "name": "OpenClaw Message Listener",
-  "description": "Listens to all messages sent to OpenClaw, logs them for monitoring, and blocks sensitive requests",
+  "description": "Provides message monitoring and an internal Codex worker for every chat channel",
   "activation": {
     "onStartup": true
+  },
+  "contracts": {
+    "tools": ["codex_worker"]
   },
   "configSchema": {
     "type": "object",

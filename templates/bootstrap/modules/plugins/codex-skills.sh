@@ -18,15 +18,16 @@
 
 TTC_SKILLS_SRC="/extensions/text-to-cad/skills"
 OPENCLAW_DIR="/home/node/.openclaw"
+OPENCLAW_SKILLS_SRC="$OPENCLAW_DIR/skills"
 AGENTS_DIR="$OPENCLAW_DIR/agents"
 
-if [ ! -d "$TTC_SKILLS_SRC" ]; then
-    echo "Codex skills: source not found ($TTC_SKILLS_SRC), skipping"
+if [ ! -d "$OPENCLAW_SKILLS_SRC" ] && [ ! -d "$TTC_SKILLS_SRC" ]; then
+    echo "Codex skills: no skill source found, skipping"
     return 0 2>/dev/null || exit 0
 fi
 
 # install_into <codex_home>
-# Copies every skill dir from the text-to-cad source into <codex_home>/skills.
+# Installs all client skills, with the client-specific OpenClaw copy taking precedence.
 install_into() {
     codex_home="$1"
     [ -n "$codex_home" ] || return 0
@@ -35,20 +36,21 @@ install_into() {
     mkdir -p "$skills_dst" || return 0
 
     count=0
-    for skill_dir in "$TTC_SKILLS_SRC"/*/; do
-        [ -d "$skill_dir" ] || continue
-        # Require a SKILL.md so we only copy real skill directories.
-        [ -f "$skill_dir/SKILL.md" ] || continue
+    for skills_src in "$TTC_SKILLS_SRC" "$OPENCLAW_SKILLS_SRC"; do
+        [ -d "$skills_src" ] || continue
+        for skill_dir in "$skills_src"/*/; do
+            [ -d "$skill_dir" ] || continue
+            [ -f "$skill_dir/SKILL.md" ] || continue
 
-        name="$(basename "$skill_dir")"
-        # Fresh copy each run (Codex ignores symlinks; keep it a real dir).
-        rm -rf "$skills_dst/$name"
-        if cp -R "$skill_dir" "$skills_dst/$name" 2>/dev/null; then
-            count=$((count + 1))
-        fi
+            name="$(basename "$skill_dir")"
+            rm -rf "$skills_dst/$name"
+            if cp -R "$skill_dir" "$skills_dst/$name" 2>/dev/null; then
+                count=$((count + 1))
+            fi
+        done
     done
 
-    echo "Codex skills: installed $count skill(s) into $skills_dst"
+    echo "Codex skills: synchronized $count skill copy/copies into $skills_dst"
 }
 
 installed_any=0
