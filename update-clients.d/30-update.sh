@@ -13,10 +13,9 @@ for client in "${CLIENTS[@]}"; do
     client_dir="$CLIENTS_DIR/$client"
     echo "Updating client: $client"
 
-    # --- Backup: update items + important runtime data (agent_data, .env) ---
-    # agent_data holds config, identity, state and skills, so it must be backed
-    # up. We skip only the heavy, regenerable parts (logs, npm cache, media,
-    # the separately-mounted projects dir, attestations, node_modules).
+    # --- Lightweight backup: overwritten files + essential runtime data ---
+    # Do not archive all of agent_data (especially agents, logs, media, caches,
+    # extensions, skills and workspace) because it can consume significant space.
     backup_dir="$BACKUPS_DIR/$client"
     backup_name="$(date +%Y%m%d-%H%M%S)"
     backup_zip="$backup_dir/$backup_name.zip"
@@ -38,21 +37,23 @@ for client in "${CLIENTS[@]}"; do
         fi
     done
 
-    # Important user data (not overwritten by the update, but must be backed up)
-    for item in agent_data .env; do
+    # Small, essential client data. agent_data/agents is intentionally omitted.
+    essential_data=(
+        ".env"
+        "agent_data/openclaw.json"
+        "agent_data/state"
+        "agent_data/identity"
+        "agent_data/openclaw-codex-app-server/state.json"
+    )
+    for item in "${essential_data[@]}"; do
         if [ -e "$client_dir/$item" ]; then
             backup_targets+=("$item")
         fi
     done
 
-    # Heavy / regenerable paths to skip inside the archive
+    # Exclude dependency trees if an updated bootstrap directory contains one.
     backup_excludes=(
         "*/node_modules/*"
-        "agent_data/logs/*"
-        "agent_data/npm/*"
-        "agent_data/media/*"
-        "agent_data/projects/*"
-        "agent_data/workspace-attestations/*"
     )
 
     if [ "${#backup_targets[@]}" -eq 0 ]; then

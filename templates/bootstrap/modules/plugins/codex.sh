@@ -10,6 +10,10 @@ CODEX_PACKAGE="@openclaw/codex"
 
 TMP=$(mktemp)
 
+if ! command -v codex >/dev/null 2>&1; then
+    npm install -g @openai/codex
+fi
+
 # Skip if plugin is already enabled
 if jq -e ".plugins.entries.\"$CODEX_PLUGIN_ID\".enabled == true" "$CONFIG" >/dev/null 2>&1; then
     echo "Codex plugin already enabled"

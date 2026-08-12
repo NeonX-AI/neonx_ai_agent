@@ -3,7 +3,10 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 title Codex - Select OpenClaw Client
 
-set "WORKSPACE=/home/node/.openclaw/workspace"
+set "WORKSPACE=/home/node/.openclaw/projects"
+rem Keep terminal Codex threads separate from OpenClaw's Telegram/App Server state.
+rem This path is inside the persistent OpenClaw mount.
+set "CODEX_HOME=/home/node/.openclaw/codex-interactive"
 
 echo ========================================
 echo   Codex Interactive Terminal
@@ -65,6 +68,7 @@ echo.
 echo Selected client : !CLIENT!
 echo Container       : !CONTAINER!
 echo Workspace       : %WORKSPACE%
+echo Codex state     : %CODEX_HOME%
 echo.
 
 docker exec "!CONTAINER!" sh -lc "command -v codex >/dev/null 2>&1"
@@ -75,12 +79,20 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Starting Codex. Type /help for help, or Ctrl+C to exit.
+docker exec "!CONTAINER!" sh -lc "mkdir -p '%CODEX_HOME%' && if [ ! -f '%CODEX_HOME%/config.toml' ] && [ -f /root/.codex/config.toml ]; then cp /root/.codex/config.toml '%CODEX_HOME%/config.toml'; chmod 600 '%CODEX_HOME%/config.toml'; fi"
+if errorlevel 1 (
+    echo [ERROR] Could not prepare the isolated Codex state directory.
+    pause
+    exit /b 1
+)
+
+echo Starting isolated Codex session. Type /help for help, or Ctrl+C to exit.
 echo.
 
-docker exec -it -w "%WORKSPACE%" "!CONTAINER!" codex --sandbox danger-full-access --ask-for-approval never --no-alt-screen
+docker exec -it -e "CODEX_HOME=%CODEX_HOME%" -w "%WORKSPACE%" "!CONTAINER!" codex --sandbox danger-full-access --ask-for-approval never --no-alt-screen
 
-set "EXIT_CODE=!ERRORLEVEL!"
+set "EXIT_CODE=!ERRORLEVEL!"}ುತ್ತಿದ್ದಾರೆ to=functions.get_errors  天天爱彩票中奖ameters  ส่งเงินบาทไทย‍ജson
+{"filePaths":["c:\\Users\\adminx\\Documents\\data\\projects\\autodesk_fusion\\neonx_ai_agent\\start-codex.bat"]}】【”】【тәылassistant to=functions.replace_string_in_file  ฝ่ายขายรายการRGCTX  天天中彩票不中返json code񎣚{}♀♀♀♀♀♀function to=functions.get_errors  大发快三豹子 天天乐购彩票{
 echo.
 if not "!EXIT_CODE!"=="0" echo Codex exited with code !EXIT_CODE!.
 echo Codex session closed.
