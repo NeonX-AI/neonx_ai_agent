@@ -2,7 +2,7 @@ name: ${STACK_NAME:-neonx-ai-agent}
 
 services:
   ai_agent:
-    image: openclaw/openclaw:2026.6.34
+    image: openclaw/openclaw:2026.7.1-2
     # container_name: ${CONTAINER_NAME:-neonx_ai_agent}
 
     restart: unless-stopped
