@@ -4,6 +4,10 @@
 
 set -u
 
+# Prevent Git Bash/MSYS from rewriting Linux container paths passed to Docker.
+export MSYS_NO_PATHCONV=1
+export MSYS2_ARG_CONV_EXCL="*"
+
 WORKSPACE="/home/node/.openclaw/projects"
 # Keep terminal Codex threads separate from OpenClaw's Telegram/App Server state.
 # This path is inside the persistent OpenClaw mount.
