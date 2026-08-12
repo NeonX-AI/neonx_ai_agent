@@ -91,8 +91,7 @@ echo.
 
 docker exec -it -e "CODEX_HOME=%CODEX_HOME%" -w "%WORKSPACE%" "!CONTAINER!" codex --sandbox danger-full-access --ask-for-approval never --no-alt-screen
 
-set "EXIT_CODE=!ERRORLEVEL!"}ುತ್ತಿದ್ದಾರೆ to=functions.get_errors  天天爱彩票中奖ameters  ส่งเงินบาทไทย‍ജson
-{"filePaths":["c:\\Users\\adminx\\Documents\\data\\projects\\autodesk_fusion\\neonx_ai_agent\\start-codex.bat"]}】【”】【тәылassistant to=functions.replace_string_in_file  ฝ่ายขายรายการRGCTX  天天中彩票不中返json code񎣚{}♀♀♀♀♀♀function to=functions.get_errors  大发快三豹子 天天乐购彩票{
+set "EXIT_CODE=!ERRORLEVEL!"
 echo.
 if not "!EXIT_CODE!"=="0" echo Codex exited with code !EXIT_CODE!.
 echo Codex session closed.
