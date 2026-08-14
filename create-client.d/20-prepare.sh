@@ -56,9 +56,9 @@ fi
 
 # Sync skills to the client.
 # Sources:
-#   1. extensions/text-to-cad/skills — text-to-cad skill library (earthtojake/text-to-cad)
-#   2. templates/skills — extra standalone skills (e.g. autodesk-fusion)
-TTC_SKILLS_DIR="$SCRIPT_DIR/extensions/text-to-cad/skills"
+#   1. templates/skills/text-to-cad/skills — text-to-cad skill library
+#   2. templates/skills — standalone skills that contain a direct SKILL.md
+TTC_SKILLS_DIR="$SCRIPT_DIR/templates/skills/text-to-cad/skills"
 EXTRA_SKILLS_DIR="$SCRIPT_DIR/templates/skills"
 if [ -d "$TTC_SKILLS_DIR" ] || [ -d "$EXTRA_SKILLS_DIR" ]; then
     echo ">>> Syncing skills to client"
@@ -67,6 +67,7 @@ if [ -d "$TTC_SKILLS_DIR" ] || [ -d "$EXTRA_SKILLS_DIR" ]; then
         [ -d "$src_dir" ] || continue
         for d in "$src_dir"/*/; do
             [ -d "$d" ] || continue
+            [ -f "$d/SKILL.md" ] || continue
             name="$(basename "$d")"
             rm -rf "$CLIENT_DIR/agent_data/skills/$name"
             if command -v rsync >/dev/null 2>&1; then

@@ -4,10 +4,9 @@ set -euo pipefail
 source "$SCRIPT_DIR/update-clients.d/00-common.sh"
 
 # Skill sources (mirrored into each client's agent_data/skills/):
-#   1. extensions/text-to-cad/skills — the text-to-cad skill library
-#      (earthtojake/text-to-cad), single source of truth for CAD/robotics skills
-#   2. templates/skills — extra standalone skills (e.g. autodesk-fusion)
-TTC_SKILLS_DIR="$SCRIPT_DIR/extensions/text-to-cad/skills"
+#   1. templates/skills/text-to-cad/skills — the text-to-cad skill library
+#   2. templates/skills — standalone skills that contain a direct SKILL.md
+TTC_SKILLS_DIR="$SCRIPT_DIR/templates/skills/text-to-cad/skills"
 EXTRA_SKILLS_DIR="$SCRIPT_DIR/templates/skills"
 
 echo ""
@@ -48,7 +47,7 @@ for client in "${CLIENTS[@]}"; do
     mkdir -p "$skills_dst"
 
     # Remove the legacy full text-to-cad repo clone (with .git, ~130MB).
-    # The skills are now synced individually from extensions/text-to-cad/skills.
+    # Skills are synced individually from templates/skills/text-to-cad/skills.
     if [ -d "$skills_dst/text-to-cad" ]; then
         echo "  Removing legacy text-to-cad repo clone..."
         rm -rf "$skills_dst/text-to-cad"
@@ -68,6 +67,7 @@ for client in "${CLIENTS[@]}"; do
     if [ -d "$TTC_SKILLS_DIR" ]; then
         for d in "$TTC_SKILLS_DIR"/*/; do
             [ -d "$d" ] || continue
+            [ -f "$d/SKILL.md" ] || continue
             name="$(basename "$d")"
             sync_skill "$TTC_SKILLS_DIR" "$skills_dst" "$name"
             synced=$((synced + 1))
@@ -76,6 +76,7 @@ for client in "${CLIENTS[@]}"; do
     if [ -d "$EXTRA_SKILLS_DIR" ]; then
         for d in "$EXTRA_SKILLS_DIR"/*/; do
             [ -d "$d" ] || continue
+            [ -f "$d/SKILL.md" ] || continue
             name="$(basename "$d")"
             sync_skill "$EXTRA_SKILLS_DIR" "$skills_dst" "$name"
             synced=$((synced + 1))

@@ -18,8 +18,9 @@ services:
       - ./projects:/home/node/.openclaw/projects
       - ./bootstrap:/bootstrap:ro
       - ../../extensions:/extensions:ro
-      # Persistent Codex CLI state (auth, sessions) for openclaw-codex-app-server
-      - codex_home:/home/node/.codex
+      - ../../templates/skills:/template-skills:ro
+      # Host-visible persistent Codex CLI state for the root container user.
+      - ./agent_data/codex-home:/root/.codex
     env_file:
       - .env
       - path: ../../.env.meta
@@ -69,6 +70,3 @@ services:
 networks:
   neonx-network:
     external: true
-
-volumes:
-  codex_home:

@@ -4,9 +4,8 @@
 # Installs the text-to-cad skill library into the Codex agent's skill
 # directory so the Codex harness inside OpenClaw can discover them.
 #
-# The text-to-cad repo is mounted read-only at /extensions/text-to-cad
-# (see docker-compose volume ../../extensions:/extensions:ro). Its skills
-# live under /extensions/text-to-cad/skills/<skill-id>/.
+# Template skills are mounted read-only at /template-skills. The bundled
+# text-to-cad skills live under /template-skills/text-to-cad/skills/<skill-id>/.
 #
 # Codex resolves its home (CODEX_HOME) per agent:
 #   homeScope "agent" (default) -> <agentDir>/codex-home
@@ -16,7 +15,7 @@
 # IMPORTANT: Codex does NOT follow symlinks for skills ("plugin add drops
 # them silently"), so we COPY each skill directory, never symlink.
 
-TTC_SKILLS_SRC="/extensions/text-to-cad/skills"
+TTC_SKILLS_SRC="/template-skills/text-to-cad/skills"
 OPENCLAW_DIR="/home/node/.openclaw"
 OPENCLAW_SKILLS_SRC="$OPENCLAW_DIR/skills"
 AGENTS_DIR="$OPENCLAW_DIR/agents"
@@ -79,7 +78,23 @@ if [ "$installed_any" -eq 0 ]; then
     done
 fi
 
-# 2) User-scoped Codex home: $HOME/.codex (covers homeScope "user")
+# 2) Interactive Codex home used by start-codex.sh/start-codex.bat.
+install_into "$OPENCLAW_DIR/codex-interactive"
+installed_any=1
+
+# Codex CLI 0.147+ discovers project skills from <workspace>/.agents/skills,
+# not from $CODEX_HOME/skills. Mirror the installed copies into that location.
+PROJECT_SKILLS_DST="$OPENCLAW_DIR/projects/.agents/skills"
+mkdir -p "$PROJECT_SKILLS_DST"
+for skill_dir in "$OPENCLAW_DIR/codex-interactive/skills"/*/; do
+    [ -f "$skill_dir/SKILL.md" ] || continue
+    name="$(basename "$skill_dir")"
+    rm -rf "$PROJECT_SKILLS_DST/$name"
+    cp -R "$skill_dir" "$PROJECT_SKILLS_DST/$name" 2>/dev/null || true
+done
+echo "Codex skills: synchronized project skills into $PROJECT_SKILLS_DST"
+
+# 3) User-scoped Codex home: $HOME/.codex (covers homeScope "user")
 if [ -n "${HOME:-}" ]; then
     install_into "$HOME/.codex"
     installed_any=1
