@@ -59,13 +59,20 @@ model = "$MODEL_NAME"
 sandbox_mode = "danger-full-access"
 approval_policy = "never"
 
+[features]
+memories = true
+
+[memories]
+generate_memories = true
+use_memories = true
+
 [model_providers.$PROVIDER_ID]
 name = "$PROVIDER_ID"
 base_url = "$BASE_URL"
 env_key = "API_KEY"
 wire_api = "$WIRE_API"
 EOF
-    echo "Codex provider: wrote $codex_home/config.toml (model=$MODEL_NAME, wire_api=$WIRE_API)"
+    echo "Codex provider: wrote $codex_home/config.toml (model=$MODEL_NAME, wire_api=$WIRE_API, memories=enabled)"
 }
 
 configured_any=0
