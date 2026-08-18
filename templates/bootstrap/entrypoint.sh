@@ -29,9 +29,9 @@ export SCRIPT_DIR
 # 6. Setup other plugins
 . "$SCRIPT_DIR/modules/plugins/telegram.sh"
 . "$SCRIPT_DIR/modules/plugins/zalo.sh"
-. "$SCRIPT_DIR/modules/plugins/codex.sh"
-. "$SCRIPT_DIR/modules/plugins/codex-skills.sh"
-. "$SCRIPT_DIR/modules/plugins/codex-provider.sh"
+# . "$SCRIPT_DIR/modules/plugins/codex.sh"
+# . "$SCRIPT_DIR/modules/plugins/codex-skills.sh"
+# . "$SCRIPT_DIR/modules/plugins/codex-provider.sh"
 # . "$SCRIPT_DIR/modules/plugins/codex-app-server.sh"
 
 # 7. Start gateway
