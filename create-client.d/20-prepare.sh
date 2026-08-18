@@ -22,6 +22,7 @@ ENV_FILE="$CLIENT_DIR/.env"
 update_or_append "$ENV_FILE" "STACK_NAME" "$CLIENT_NAME"
 update_or_append "$ENV_FILE" "BASE_URL" "$BASE_URL"
 update_or_append "$ENV_FILE" "API_KEY" "$API_KEY"
+update_or_append "$ENV_FILE" "CHAT_BOT" "$CHAT_BOT"
 
 if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
     update_or_append "$ENV_FILE" "TELEGRAM_BOT_TOKEN" "$TELEGRAM_BOT_TOKEN"

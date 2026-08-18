@@ -36,6 +36,9 @@ fi
 
 read -rp "Enter TELEGRAM_BOT_TOKEN (leave empty to skip): " TELEGRAM_BOT_TOKEN
 
+read -rp "Enable chatbot mode [true]: " CHAT_BOT
+CHAT_BOT="${CHAT_BOT:-true}"
+
 # Check if Meta App credentials exist
 META_ENV_FILE="$SCRIPT_DIR/.env.meta"
 if [ -f "$META_ENV_FILE" ]; then
@@ -62,8 +65,8 @@ fi
 read -rp "Enter FACEBOOK_PAGE_ID (leave empty to skip): " FACEBOOK_PAGE_ID
 read -rp "Enter FACEBOOK_PAGE_ACCESS_TOKEN (leave empty to skip): " FACEBOOK_PAGE_ACCESS_TOKEN
 
-read -rp "Enter MODEL_NAME [neonx/neonx-3.0-coder]: " MODEL_NAME
-MODEL_NAME="${MODEL_NAME:-neonx/neonx-3.0-coder}"
+read -rp "Enter MODEL_NAME [neonx/neonx-3.1-pro]: " MODEL_NAME
+MODEL_NAME="${MODEL_NAME:-neonx/neonx-3.1-pro}"
 
 read -rp "Enter API protocol (openai-completions | openai-responses | anthropic-messages) [openai-completions]: " API
 API="${API:-openai-completions}"
@@ -88,4 +91,4 @@ else
     echo "Using provider/model: $PROVIDER_AND_MODEL"
 fi
 
-export CLIENT_NAME BASE_URL API_KEY TELEGRAM_BOT_TOKEN FACEBOOK_APP_SECRET FACEBOOK_VERIFY_TOKEN FACEBOOK_PAGE_ID FACEBOOK_PAGE_ACCESS_TOKEN MODEL_NAME PROVIDER_AND_MODEL API
+export CLIENT_NAME BASE_URL API_KEY TELEGRAM_BOT_TOKEN CHAT_BOT FACEBOOK_APP_SECRET FACEBOOK_VERIFY_TOKEN FACEBOOK_PAGE_ID FACEBOOK_PAGE_ACCESS_TOKEN MODEL_NAME PROVIDER_AND_MODEL API
