@@ -4,13 +4,13 @@ set -euo pipefail
 source "$SCRIPT_DIR/update-clients.d/00-common.sh"
 
 # Create external network if it doesn't exist
-if ! docker network inspect neonx-network >/dev/null 2>&1; then
+if ! "${DOCKER_CMD[@]}" network inspect neonx-network >/dev/null 2>&1; then
     echo ">>> Creating external network: neonx-network"
-    if docker network create neonx-network 2>/dev/null; then
+    if "${DOCKER_CMD[@]}" network create neonx-network; then
         echo "  ✓ Network created"
     else
-        echo "  ! Failed to create network. You may need to run manually:"
-        echo "    docker network create neonx-network"
+        echo "  ✗ Failed to create network"
+        exit 1
     fi
 fi
 
@@ -31,7 +31,7 @@ if [ "$RESTART_CONTAINERS" = true ]; then
         fi
         
         # Restart containers
-        if docker compose down && docker compose up -d; then
+        if "${COMPOSE_CMD[@]}" down && "${COMPOSE_CMD[@]}" up -d; then
             echo "  ✓ Client '$client' restarted successfully"
         else
             echo "  ✗ Failed to restart client '$client'"

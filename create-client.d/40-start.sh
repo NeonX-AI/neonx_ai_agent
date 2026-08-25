@@ -8,17 +8,17 @@ echo ">>> Starting services for client: $CLIENT_NAME"
 cd "$CLIENT_DIR"
 
 # Create external network if it doesn't exist
-if ! docker network inspect neonx-network >/dev/null 2>&1; then
+if ! "${DOCKER_CMD[@]}" network inspect neonx-network >/dev/null 2>&1; then
     echo ">>> Creating external network: neonx-network"
-    if docker network create neonx-network 2>/dev/null; then
+    if "${DOCKER_CMD[@]}" network create neonx-network; then
         echo "  ✓ Network created"
     else
-        echo "  ! Failed to create network. You may need to run manually:"
-        echo "    docker network create neonx-network"
+        echo "  ✗ Failed to create network"
+        exit 1
     fi
 fi
 
-STACK_NAME="$CLIENT_NAME" API_KEY="$API_KEY" BASE_URL="$BASE_URL" API="$API" $COMPOSE_CMD up -d --force-recreate
+STACK_NAME="$CLIENT_NAME" API_KEY="$API_KEY" BASE_URL="$BASE_URL" API="$API" "${COMPOSE_CMD[@]}" up -d --force-recreate
 
 echo ">>> Done! Client '$CLIENT_NAME' is running."
-$COMPOSE_CMD ps
+"${COMPOSE_CMD[@]}" ps

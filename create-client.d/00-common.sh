@@ -3,16 +3,36 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-if command -v docker-compose >/dev/null 2>&1; then
-    COMPOSE_CMD="docker-compose"
-elif docker compose version >/dev/null 2>&1; then
-    COMPOSE_CMD="docker compose"
+# Use Docker directly where possible (Docker Desktop/Windows/macOS). On Linux,
+# fall back to sudo only when the current user cannot access the Docker daemon.
+DOCKER_CMD=(docker)
+if ! docker info >/dev/null 2>&1; then
+    if [[ "${OSTYPE:-}" == linux* ]] && command -v sudo >/dev/null 2>&1 && sudo -n docker info >/dev/null 2>&1; then
+        DOCKER_CMD=(sudo docker)
+        echo "Info: Docker requires elevated privileges; using sudo."
+    else
+        echo "Error: Cannot connect to the Docker daemon."
+        echo "On Ubuntu, add your user to the docker group, then log out and back in:"
+        echo "  sudo usermod -aG docker \$USER"
+        echo "Or authenticate sudo once before running this script: sudo -v"
+        exit 1
+    fi
+fi
+
+if "${DOCKER_CMD[@]}" compose version >/dev/null 2>&1; then
+    COMPOSE_CMD=("${DOCKER_CMD[@]}" compose)
+elif command -v docker-compose >/dev/null 2>&1; then
+    if [ "${DOCKER_CMD[0]}" = "sudo" ]; then
+        COMPOSE_CMD=(sudo docker-compose)
+    else
+        COMPOSE_CMD=(docker-compose)
+    fi
 else
     echo "Error: Neither 'docker-compose' nor 'docker compose' found"
     exit 1
 fi
 
-export SCRIPT_DIR COMPOSE_CMD
+export SCRIPT_DIR
 
 update_or_append() {
     local env_file="$1"
