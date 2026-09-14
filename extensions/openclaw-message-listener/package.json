@@ -1,0 +1,26 @@
+{
+  "name": "openclaw-message-listener",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && node -e \"require('node:fs').copyFileSync('openclaw.plugin.json','dist/openclaw.plugin.json')\"",
+    "dev": "tsc --watch"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "hooks": {
+      "allowConversationAccess": true
+    },
+    "compat": {
+      "pluginApi": ">=2026.3.24-beta.2",
+      "minGatewayVersion": "2026.3.24-beta.2"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {}
+}

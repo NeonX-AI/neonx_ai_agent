@@ -73,7 +73,7 @@ else
     echo "Make sure the plugin is already built in ./openclaw-message-listener/dist/"
 fi
 
-if [[ $(docker network create -d bridge neonx-network) ]];
+if [[ $(sudo docker network create -d bridge neonx-network) ]];
 then
     echo "Created neonx-network"
 else

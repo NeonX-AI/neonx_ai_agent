@@ -1,0 +1,15 @@
+{
+  "id": "openclaw-message-listener",
+  "name": "OpenClaw Message Listener",
+  "description": "Provides message monitoring and an internal Codex worker for every chat channel",
+  "activation": {
+    "onStartup": true
+  },
+  "contracts": {
+    "tools": ["codex_worker"]
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false
+  }
+}

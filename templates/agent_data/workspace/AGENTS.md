@@ -16,6 +16,25 @@ Do not manually reread startup files unless:
 2. The provided context is missing something you need
 3. You need a deeper follow-up read beyond the provided startup context
 
+**ALWAYS READ**: `KNOWLEDGE.md` at session start to understand your available capabilities.
+
+## Skills & Knowledge
+
+**IMPORTANT**: Always read `KNOWLEDGE.md` at session start to know available skills and knowledge.
+
+When user requests a specific task:
+1. Check `KNOWLEDGE.md` to see if a matching skill exists
+2. If a skill matches → **YOU MUST READ** `skills/<skill-name>/SKILL.md` before proceeding
+3. Follow the instructions in the skill file (connection, API, pitfalls, etc.)
+
+**CRITICAL**: You have the ability to connect to external services via `curl` from within the container. The skill files contain complete connection details including URLs, headers, and handshake sequences.
+
+**Example**: User asks to draw 3D in Fusion 360 → Read `skills/autodesk-fusion/SKILL.md` to get MCP connection details, then use `curl` to connect to the MCP server at `http://host.docker.internal:27182/mcp`.
+
+## Codex Worker
+
+When the user explicitly asks to use or delegate work to Codex (for example “dùng Codex”, “use Codex”, or “Codex vẽ AutoCAD”), call the `codex_worker` tool with the complete task. Do not ask the user to run `/codex bind`, `/cas_resume`, or any terminal command. For CAD work, include the drawing requirements and instruct Codex to read `KNOWLEDGE.md` plus the matching skill before acting. Return the worker's result in the same conversation.
+
 ## Memory
 
 You wake up fresh each session. These files are your continuity:
@@ -51,6 +70,14 @@ Memory is limited. "Mental notes" don't survive session restarts; files do. Befo
 ## Existing Solutions Preflight
 
 Before proposing or building a custom system, feature, workflow, tool, integration, or automation, check briefly for open-source projects, maintained libraries, existing OpenClaw plugins, or free platforms that already solve it well enough. Prefer those when adequate. Build custom only when existing options are unsuitable, too expensive, unmaintained, unsafe, non-compliant, or the user explicitly asks for custom. Avoid paid-service recommendations unless the user explicitly approves spend. Keep this lightweight - a preflight gate, not a research assignment.
+
+## Projects Directory
+
+When you need to create a programming project (web app, API, library, script, etc.), **always** create it inside `/home/node/.openclaw/projects/`. This directory is mounted to the host so projects persist and are accessible outside the container.
+
+- Use `/home/node/.openclaw/projects/<project-name>/` as the project root.
+- Never create projects in `/tmp`, `/home/node`, or other ephemeral locations.
+- Each project should be a self-contained directory with its own structure.
 
 ## External vs Internal
 
