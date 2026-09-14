@@ -12,10 +12,10 @@ export SCRIPT_DIR
 . "$SCRIPT_DIR/update-clients.d/30-update.sh"
 
 # 3. Sync skills to clients
-. "$SCRIPT_DIR/update-clients.d/35-sync-skills.sh"
+# . "$SCRIPT_DIR/update-clients.d/35-sync-skills.sh"
 
 # 4. Sync workspace files to clients
-. "$SCRIPT_DIR/update-clients.d/36-sync-workspace.sh"
+# . "$SCRIPT_DIR/update-clients.d/36-sync-workspace.sh"
 
 # 5. Restart containers
 . "$SCRIPT_DIR/update-clients.d/40-restart.sh"
