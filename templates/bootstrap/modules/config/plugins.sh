@@ -39,6 +39,12 @@ if [ -f "$CONFIG" ]; then
     ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
     echo "Ensured openclaw-message-listener plugin is enabled and allowed"
 
+    # Allow Telegram so it can be enabled later from Guided channel setup even
+    # before a bot token has been saved in the client's environment.
+    jq '
+    .plugins.allow |= (. + ["telegram"] | unique)
+    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+
     # Enable active-memory plugin
     jq '
     .plugins.entries."active-memory" = {enabled: true} |
