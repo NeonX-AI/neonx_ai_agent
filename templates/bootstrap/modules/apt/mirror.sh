@@ -2,8 +2,11 @@
 # Module: use a nearby Debian mirror for bootstrap package installation.
 # Debian Release files are signature-verified by APT, including over HTTP.
 
-APT_MIRROR="${APT_MIRROR:-http://ftp.jp.debian.org/debian}"
-APT_SECURITY_MIRROR="${APT_SECURITY_MIRROR:-http://ftp.jp.debian.org/debian-security}"
+# Aliyun's Asia CDN has proved substantially faster for package archives than
+# the Japanese Debian mirror on the deployment route. Override either variable
+# in a client's .env if its server has a better local mirror.
+APT_MIRROR="${APT_MIRROR:-https://mirrors.aliyun.com/debian}"
+APT_SECURITY_MIRROR="${APT_SECURITY_MIRROR:-https://mirrors.aliyun.com/debian-security}"
 
 if ! command -v apt-get >/dev/null 2>&1; then
     exit 0
