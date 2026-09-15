@@ -2,8 +2,11 @@ name: ${STACK_NAME:-neonx-ai-agent}
 
 services:
   ai_agent:
-    image: openclaw/openclaw:2026.9.4
     # container_name: ${CONTAINER_NAME:-neonx_ai_agent}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neonx-openclaw:local
 
     restart: unless-stopped
 

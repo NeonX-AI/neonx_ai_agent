@@ -18,7 +18,7 @@ if ! "${DOCKER_CMD[@]}" network inspect neonx-network >/dev/null 2>&1; then
     fi
 fi
 
-STACK_NAME="$CLIENT_NAME" API_KEY="$API_KEY" BASE_URL="$BASE_URL" API="$API" "${COMPOSE_CMD[@]}" up -d --force-recreate
+STACK_NAME="$CLIENT_NAME" API_KEY="$API_KEY" BASE_URL="$BASE_URL" API="$API" "${COMPOSE_CMD[@]}" up -d --build --force-recreate
 
 echo ">>> Done! Client '$CLIENT_NAME' is running."
 "${COMPOSE_CMD[@]}" ps

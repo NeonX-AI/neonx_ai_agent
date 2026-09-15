@@ -39,6 +39,7 @@ export AUTO_YES
 UPDATE_ITEMS=(
     "bootstrap/entrypoint.sh"
     "bootstrap/modules"
+    "Dockerfile"
     "docker-compose.yml"
 )
 
