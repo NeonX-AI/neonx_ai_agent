@@ -15,17 +15,17 @@ services:
 
     volumes:
       - ./agent_data:/home/node/.openclaw
-      - ./projects:/home/node/.openclaw/projects
+      # - ./projects:/home/node/.openclaw/projects
       - ./bootstrap:/bootstrap:ro
       - ../../extensions:/extensions:ro
-      - ../../templates/skills:/template-skills:ro
+      # - ../../templates/skills:/template-skills:ro
     env_file:
       - .env
       - path: ../../.env.meta
         required: false
     environment:
       TZ: Asia/Ho_Chi_Minh
-      OPENCLAW_GATEWAY_PASSWORD: "changeme"
+      OPENCLAW_GATEWAY_PASSWORD: "neonx@changeme"
       OPENCLAW_HOME: /home/node
       BASE_URL: ${BASE_URL:-http://ai_gateway:20128/v1}
       API_KEY: ${API_KEY:-sk-aea5c2d612c2e3dd-sd6l75-8a587593}
@@ -40,10 +40,10 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       # Set true only with a valid OpenAI API key; otherwise semantic recall is disabled.
       MEMORY_SEARCH_ENABLED: ${MEMORY_SEARCH_ENABLED:-false}
-      CODEX_APP_SERVER_WORKSPACE_DIR: ${CODEX_APP_SERVER_WORKSPACE_DIR:-}
-      CODEX_APP_SERVER_MODEL: ${CODEX_APP_SERVER_MODEL:-}
-      CODEX_APP_SERVER_TRANSPORT: ${CODEX_APP_SERVER_TRANSPORT:-}
-      CODEX_APP_SERVER_URL: ${CODEX_APP_SERVER_URL:-}
+      # CODEX_APP_SERVER_WORKSPACE_DIR: ${CODEX_APP_SERVER_WORKSPACE_DIR:-}
+      # CODEX_APP_SERVER_MODEL: ${CODEX_APP_SERVER_MODEL:-}
+      # CODEX_APP_SERVER_TRANSPORT: ${CODEX_APP_SERVER_TRANSPORT:-}
+      # CODEX_APP_SERVER_URL: ${CODEX_APP_SERVER_URL:-}
 
     # deploy:
     #   resources:
