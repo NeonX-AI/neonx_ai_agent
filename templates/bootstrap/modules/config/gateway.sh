@@ -24,4 +24,11 @@ if [ -f "$CONFIG" ]; then
         }' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
         echo "Set gateway.controlUi configuration"
     fi
+    # Existing clients may already have a controlUi block from an older
+    # template, so the creation block above does not add this setting for them.
+    # This deployment deliberately skips one-time browser device approval.
+    if ! jq -e '.gateway.controlUi.dangerouslyDisableDeviceAuth == true' "$CONFIG" >/dev/null; then
+        jq '.gateway.controlUi.dangerouslyDisableDeviceAuth = true' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+        echo "Disabled Control UI browser device approval"
+    fi
 fi
