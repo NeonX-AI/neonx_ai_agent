@@ -24,23 +24,58 @@ export SCRIPT_DIR CLIENTS_DIR TEMPLATES_DIR
 
 # Parse arguments
 AUTO_YES=false
+GATEWAY_START_ONLY=false
 for arg in "$@"; do
     case $arg in
         -y|--yes)
             AUTO_YES=true
-            shift
+            ;;
+        --gateway-start-only|--skip-bootstrap)
+            GATEWAY_START_ONLY=true
             ;;
     esac
 done
 
-export AUTO_YES
+export AUTO_YES GATEWAY_START_ONLY
+
+set_env_value() {
+    local env_file="$1" key="$2" value="$3"
+    if grep -q "^${key}=" "$env_file" 2>/dev/null; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s|^${key}=.*|${key}=${value}|" "$env_file"
+        else
+            sed -i "s|^${key}=.*|${key}=${value}|" "$env_file"
+        fi
+    else
+        printf '%s=%s\n' "$key" "$value" >> "$env_file"
+    fi
+}
+
+remove_env_value() {
+    local env_file="$1" key="$2"
+    [ -f "$env_file" ] || return 0
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "/^${key}=/d" "$env_file"
+    else
+        sed -i "/^${key}=/d" "$env_file"
+    fi
+}
 
 # Files/directories to update from templates
-UPDATE_ITEMS=(
-    "bootstrap/entrypoint.sh"
-    "bootstrap/modules"
-    "docker-compose.yml"
-)
+if [ "$GATEWAY_START_ONLY" = true ]; then
+    # Preserve every client-specific bootstrap customization, but retain the
+    # gateway launcher so a gateway startup fix can still be rolled out.
+    UPDATE_ITEMS=(
+        "bootstrap/modules/gateway/start.sh"
+        "docker-compose.yml"
+    )
+else
+    UPDATE_ITEMS=(
+        "bootstrap/entrypoint.sh"
+        "bootstrap/modules"
+        "docker-compose.yml"
+    )
+fi
 
 # Files/directories to NEVER update (user-specific data)
 EXCLUDE_ITEMS=(

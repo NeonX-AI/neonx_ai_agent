@@ -17,6 +17,9 @@ if [ ${#CLIENTS[@]} -eq 0 ]; then
 fi
 
 echo "Found ${#CLIENTS[@]} client(s): ${CLIENTS[*]}"
+if [ "$GATEWAY_START_ONLY" = true ]; then
+    echo "Bootstrap update: skipped (only bootstrap/modules/gateway/start.sh will be updated)"
+fi
 echo ""
 
 # Ask for confirmation

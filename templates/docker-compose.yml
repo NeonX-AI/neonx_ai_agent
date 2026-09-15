@@ -10,7 +10,9 @@ services:
     stdin_open: true
     tty: true
 
-    entrypoint: ["/bin/sh", "/bootstrap/entrypoint.sh"]
+    # --gateway-start-only sets BOOTSTRAP_ENTRYPOINT in the client .env so the
+    # gateway starts without executing the rest of the bootstrap modules.
+    entrypoint: ["/bin/sh", "${BOOTSTRAP_ENTRYPOINT:-/bootstrap/entrypoint.sh}"]
     user: "0:0"
 
     volumes:

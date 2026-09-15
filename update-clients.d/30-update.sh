@@ -138,6 +138,20 @@ for client in "${CLIENTS[@]}"; do
         fi
     done
 
+    # This option changes the container entrypoint, not just the files copied
+    # during this update. It therefore prevents the retained entrypoint from
+    # continuing to run nano, jq, Python, and plugin bootstrap modules.
+    env_file="$client_dir/.env"
+    if [ "$GATEWAY_START_ONLY" = true ]; then
+        set_env_value "$env_file" "NEONX_GATEWAY_START_ONLY" "true"
+        set_env_value "$env_file" "BOOTSTRAP_ENTRYPOINT" "/bootstrap/modules/gateway/start.sh"
+        echo "  Gateway-start-only mode enabled"
+    elif grep -q '^NEONX_GATEWAY_START_ONLY=true$' "$env_file" 2>/dev/null; then
+        remove_env_value "$env_file" "NEONX_GATEWAY_START_ONLY"
+        remove_env_value "$env_file" "BOOTSTRAP_ENTRYPOINT"
+        echo "  Gateway-start-only mode disabled"
+    fi
+
     echo "  ✓ Client '$client' updated"
     echo ""
 done
