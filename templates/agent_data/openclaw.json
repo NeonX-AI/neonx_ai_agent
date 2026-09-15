@@ -90,14 +90,5 @@
         ]
       }
     }
-  },
-  "wizard": {
-    "lastRunAt": "2026-07-22T15:36:26.993Z",
-    "lastRunVersion": "2026.7.1",
-    "lastRunCommand": "configure",
-    "lastRunMode": "local"
-  },
-  "meta": {
-    "lastTouchedVersion": "2026.7.1"
   }
 }
