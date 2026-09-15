@@ -18,29 +18,10 @@ if [ "$RESTART_CONTAINERS" = true ]; then
     echo ">>> Preparing OpenClaw upgrade..."
     echo ""
 
-    # OpenClaw migrations must run while the gateway is stopped. Build every
-    # client image first (pulling its Dockerfile base image), then stop every
+    # OpenClaw migrations must run while the gateway is stopped. Stop every
     # client before touching any state database.
     # This prevents one client from continuing to use a database while another
     # client is being migrated during a batch upgrade.
-    for client in "${CLIENTS[@]}"; do
-        client_dir="$CLIENTS_DIR/$client"
-        echo "Building image for client: $client"
-
-        if [ ! -f "$client_dir/docker-compose.yml" ]; then
-            echo "  Warning: docker-compose.yml not found, skipping"
-            continue
-        fi
-
-        if (cd "$client_dir" && "${COMPOSE_CMD[@]}" build --pull ai_agent); then
-            echo "  ✓ Image ready"
-        else
-            echo "  ✗ Failed to build image; this client will still use its existing image"
-        fi
-
-        echo ""
-    done
-
     stopped_clients=()
 
     echo ">>> Stopping all client gateways..."
@@ -102,5 +83,5 @@ if [ "$RESTART_CONTAINERS" = true ]; then
     echo ">>> Batch update completed."
 else
     echo "To apply changes, restart each client manually:"
-    echo "  cd clients/<client-name> && docker compose down && docker compose up -d --build"
+    echo "  cd clients/<client-name> && docker compose up -d"
 fi

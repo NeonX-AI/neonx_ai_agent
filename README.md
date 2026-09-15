@@ -31,7 +31,7 @@ sudo ./create-client.sh
 # Update clients
 sudo ./update-clients.sh
 
-Để nâng cấp OpenClaw, chỉ sửa version ở dòng `FROM` trong `templates/Dockerfile`, rồi chạy `sudo ./update-clients.sh`. Lệnh này copy Dockerfile mới vào từng client, build lại image với `--pull`, dừng toàn bộ gateway, chạy `openclaw doctor --fix` cho từng state database (ví dụ migration `audit-events-v2`), rồi khởi động lại các client migrate thành công. Client nào migrate lỗi sẽ được giữ ở trạng thái dừng và tạo file `.openclaw-migration-failed` trong thư mục client.
+Để nâng cấp OpenClaw, sửa image version trong `templates/docker-compose.yml`, rồi chạy `sudo ./update-clients.sh`. Lệnh này dừng toàn bộ gateway, chạy `openclaw doctor --fix` cho từng state database (ví dụ migration `audit-events-v2`), rồi khởi động lại các client migrate thành công. Client nào migrate lỗi sẽ được giữ ở trạng thái dừng và tạo file `.openclaw-migration-failed` trong thư mục client.
 
 Semantic memory (OpenAI embeddings) mặc định tắt vì cần OpenAI API key riêng. Để bật cho một client, thêm `OPENAI_API_KEY` và `MEMORY_SEARCH_ENABLED=true` vào file `.env` của client rồi chạy lại `./update-clients.sh`.
 
