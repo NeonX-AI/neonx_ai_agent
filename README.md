@@ -31,6 +31,10 @@ sudo ./create-client.sh
 # Update clients
 sudo ./update-clients.sh
 
+Khi template OpenClaw được nâng cấp, lệnh này tự pull image mới, dừng toàn bộ gateway, chạy `openclaw doctor --fix` cho từng state database (ví dụ migration `audit-events-v2`), rồi khởi động lại các client migrate thành công. Client nào migrate lỗi sẽ được giữ ở trạng thái dừng và tạo file `.openclaw-migration-failed` trong thư mục client.
+
+Semantic memory (OpenAI embeddings) mặc định tắt vì cần OpenAI API key riêng. Để bật cho một client, thêm `OPENAI_API_KEY` và `MEMORY_SEARCH_ENABLED=true` vào file `.env` của client rồi chạy lại `./update-clients.sh`.
+
 # Api Type
 ## Api env chấp nhận 3 giá trị:
 openai-completions (OpenAI-compatible)

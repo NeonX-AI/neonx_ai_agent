@@ -10,8 +10,16 @@ if [ -n "${TELEGRAM_BOT_TOKEN:-}" ]; then
     jq '
     .plugins.allow |= (. + ["telegram"] | unique) |
     .plugins.entries.telegram = {enabled: true} |
-    .channels.telegram.accounts.default.dmPolicy = "open" |
-    .channels.telegram.accounts.default.allowFrom = ["*"]
+    .channels |= (. // {}) |
+    .channels.telegram |= (. // {}) |
+    .channels.telegram.accounts |= (. // {}) |
+    .channels.telegram.accounts.default |= (. // {}) |
+    if .channels.telegram.accounts.default.dmPolicy == null then
+        .channels.telegram.accounts.default.dmPolicy = "open" |
+        .channels.telegram.accounts.default.allowFrom = ["*"]
+    else
+        .
+    end
     ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-    echo "Enabled Telegram plugin with open DM policy"
+    echo "Enabled Telegram plugin (existing dmPolicy is preserved; default is open)"
 fi
