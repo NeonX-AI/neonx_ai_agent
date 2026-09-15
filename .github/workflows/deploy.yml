@@ -3,8 +3,6 @@ name: NeonX AI Agent Deploy
 on:
   push:
     branches:
-      - "dev"
-      - "Server_02"
 
 jobs:
   deploy:
@@ -20,28 +18,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      # Connect to VPN if config provided
-      - name: Install OpenVPN
-        if: ${{ env.OPENVPN_CONFIG != '' }}
-        run: |
-          sudo apt update
-          sudo apt install -y openvpn openvpn-systemd-resolved
-
-      - name: Restore OVPN file
-        if: ${{ env.OPENVPN_CONFIG != '' }}
-        run: |
-          printf "%s" "$OPENVPN_CONFIG" > client.ovpn
-
-      - name: Connect VPN
-        if: ${{ env.OPENVPN_CONFIG != '' }}
-        uses: kota65535/github-openvpn-connect-action@v3
-        with:
-          config_file: client.ovpn
-      
-      - name: Remove temporary VPN files
-        run: rm -f client.ovpn openvpn.log openvpn.pid
-      # Connect to VPN if config provided
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

@@ -37,12 +37,17 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "neonx/neonx-3.0-plus"
+        "primary": "neonx/neonx-3.1-pro"
       }
     }
   },
   "session": {
     "dmScope": "per-channel-peer"
+  },
+  "memory": {
+    "search": {
+      "enabled": false
+    }
   },
   "models": {
     "mode": "merge",
@@ -53,8 +58,8 @@
         "apiKey": "sk-aea5c2d612c2e3dd-qe79fw-bedefcc3",
         "models": [
           {
-            "id": "neonx-3.0-plus",
-            "name": "neonx-3.0-plus (Custom Provider)",
+            "id": "neonx-3.1-pro",
+            "name": "neonx-3.1-pro (Custom Provider)",
             "contextWindow": 128000,
             "maxTokens": 4096,
             "input": [
@@ -69,30 +74,6 @@
             }
           }
         ]
-      }
-    }
-  },
-  "mcp": {
-    "servers": {
-      "autodesk-fusion": {
-        "url": "http://host.docker.internal:27182/mcp",
-        "transport": "streamable-http",
-        "enabled": true,
-        "connectionTimeoutMs": 5000,
-        "requestTimeoutMs": 60000,
-        "headers": {
-          "Host": "127.0.0.1:27182"
-        }
-      },
-      "autocad": {
-        "url": "http://host.docker.internal:8000/mcp",
-        "transport": "streamable-http",
-        "enabled": true,
-        "connectionTimeoutMs": 5000,
-        "requestTimeoutMs": 60000,
-        "headers": {
-          "Host": "127.0.0.1:8000"
-        }
       }
     }
   },

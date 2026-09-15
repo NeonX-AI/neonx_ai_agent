@@ -14,7 +14,7 @@ export SCRIPT_DIR
 # . "$SCRIPT_DIR/modules/restart/setup.sh"
 
 # 3. Setup plugins (before config init so plugins are available)
-# . "$SCRIPT_DIR/modules/plugins/openclaw-message-listener.sh"
+. "$SCRIPT_DIR/modules/plugins/openclaw-message-listener.sh"
 # . "$SCRIPT_DIR/modules/plugins/facebook.sh"
 
 # 4. Initialize config

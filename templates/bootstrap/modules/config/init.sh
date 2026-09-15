@@ -18,6 +18,8 @@ CONFIG_SCRIPT_DIR="$SCRIPT_DIR/modules/config"
 . "$CONFIG_SCRIPT_DIR/gateway.sh"
 . "$CONFIG_SCRIPT_DIR/plugins.sh"
 . "$CONFIG_SCRIPT_DIR/commands.sh"
+. "$CONFIG_SCRIPT_DIR/memory.sh"
+. "$CONFIG_SCRIPT_DIR/mcp.sh"
 # . "$CONFIG_SCRIPT_DIR/security.sh"
 
 # Set sessionScope to per-channel-peer (each sender on each channel gets own session)

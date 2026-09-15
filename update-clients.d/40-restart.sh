@@ -15,33 +15,90 @@ if ! "${DOCKER_CMD[@]}" network inspect neonx-network >/dev/null 2>&1; then
 fi
 
 if [ "$RESTART_CONTAINERS" = true ]; then
-    echo ">>> Restarting docker containers..."
+    echo ">>> Preparing OpenClaw upgrade..."
     echo ""
-    
+
+    # OpenClaw migrations must run while the gateway is stopped.  Pull all
+    # images first, then stop every client before touching any state database.
+    # This prevents one client from continuing to use a database while another
+    # client is being migrated during a batch upgrade.
     for client in "${CLIENTS[@]}"; do
         client_dir="$CLIENTS_DIR/$client"
-        echo "Restarting client: $client"
-        
-        cd "$client_dir"
-        
-        # Check if docker-compose.yml exists
-        if [ ! -f "docker-compose.yml" ]; then
-            echo "  Warning: docker-compose.yml not found, skipping restart"
+        echo "Pulling image for client: $client"
+
+        if [ ! -f "$client_dir/docker-compose.yml" ]; then
+            echo "  Warning: docker-compose.yml not found, skipping"
             continue
         fi
-        
-        # Restart containers
-        if "${COMPOSE_CMD[@]}" down && "${COMPOSE_CMD[@]}" up -d; then
-            echo "  ✓ Client '$client' restarted successfully"
+
+        if (cd "$client_dir" && "${COMPOSE_CMD[@]}" pull ai_agent); then
+            echo "  ✓ Image ready"
         else
-            echo "  ✗ Failed to restart client '$client'"
+            echo "  ✗ Failed to pull image; this client will still be started with its existing image"
         fi
-        
+
         echo ""
     done
-    
+
+    stopped_clients=()
+
+    echo ">>> Stopping all client gateways..."
+    for client in "${CLIENTS[@]}"; do
+        client_dir="$CLIENTS_DIR/$client"
+        [ -f "$client_dir/docker-compose.yml" ] || continue
+
+        echo "Stopping client: $client"
+        if (cd "$client_dir" && "${COMPOSE_CMD[@]}" down); then
+            echo "  ✓ Stopped"
+            stopped_clients+=("$client")
+        else
+            echo "  ✗ Failed to stop; skipping migration for safety"
+        fi
+    done
+
+    echo ""
+    echo ">>> Migrating OpenClaw state databases..."
+    for client in "${stopped_clients[@]}"; do
+        client_dir="$CLIENTS_DIR/$client"
+        [ -f "$client_dir/docker-compose.yml" ] || continue
+
+        echo "Migrating client: $client"
+        rm -f "$client_dir/.openclaw-migration-failed"
+        # The persistent plugin path is validated before OpenClaw runs. Install
+        # it in the one-off container first, then apply every pending migration
+        # (including audit-events-v2) with the new image.
+        if (cd "$client_dir" && "${COMPOSE_CMD[@]}" run --rm --no-deps --entrypoint /bin/sh ai_agent -c \
+            '. /bootstrap/modules/plugins/openclaw-message-listener.sh && openclaw doctor --fix'); then
+            echo "  ✓ State database migrated"
+        else
+            echo "  ✗ Migration failed; this client will not be started automatically"
+            touch "$client_dir/.openclaw-migration-failed"
+        fi
+
+        echo ""
+    done
+
+    echo ">>> Starting docker containers..."
+    for client in "${stopped_clients[@]}"; do
+        client_dir="$CLIENTS_DIR/$client"
+        [ -f "$client_dir/docker-compose.yml" ] || continue
+
+        if [ -e "$client_dir/.openclaw-migration-failed" ]; then
+            echo "  ! Client '$client' left stopped because its migration failed"
+            continue
+        fi
+
+        echo "Starting client: $client"
+        if (cd "$client_dir" && "${COMPOSE_CMD[@]}" up -d); then
+            echo "  ✓ Client '$client' started successfully"
+        else
+            echo "  ✗ Failed to start client '$client'"
+        fi
+        echo ""
+    done
+
     cd "$SCRIPT_DIR"
-    echo ">>> All clients restarted!"
+    echo ">>> Batch update completed."
 else
     echo "To apply changes, restart each client manually:"
     echo "  cd clients/<client-name> && docker compose down && docker compose up -d"
