@@ -1,46 +1,71 @@
 #!/bin/sh
-# Module: Zalo plugins setup
-# Installs openzca npm library and Zalo plugins
+# Module: Zalo plugin recovery and setup
+#
+# OpenClaw extensions live in the persistent OpenClaw home, but `openzca` is
+# installed globally in the container image. A base-image upgrade therefore
+# removes it. Only run this module for clients that were already configured for
+# Zalo so updating other clients does not add Zalo unexpectedly.
 
 CONFIG_PATH="/home/node/.openclaw"
 CONFIG="$CONFIG_PATH/openclaw.json"
-TMP=$(mktemp)
+EXTENSIONS_PATH="$CONFIG_PATH/extensions"
 
-# Install openzca npm package globally
-echo "Installing openzca npm package..."
-if command -v npm >/dev/null 2>&1; then
-    npm install -g openzca 2>&1 || echo "Warning: Failed to install openzca globally"
-else
-    echo "Warning: npm not found, cannot install openzca"
+has_existing_zalo_setup() {
+    if [ -d "$EXTENSIONS_PATH/zalo" ] || [ -d "$EXTENSIONS_PATH/zalouser" ]; then
+        return 0
+    fi
+
+    [ -f "$CONFIG" ] || return 1
+    jq -e '
+        (.plugins.entries.zalo? != null) or
+        (.plugins.entries.zalouser? != null) or
+        ((.plugins.allow? // []) | index("zalo") != null) or
+        ((.plugins.allow? // []) | index("zalouser") != null) or
+        (.channels.zalo? != null) or
+        (.channels.zalouser? != null)
+    ' "$CONFIG" >/dev/null 2>&1
+}
+
+if ! command -v jq >/dev/null 2>&1; then
+    echo "Warning: jq not found, cannot check for existing Zalo setup"
+    return 0
 fi
 
-# Check if openzca is installed
+if ! has_existing_zalo_setup; then
+    echo "No existing Zalo setup found; skipping Zalo recovery"
+    return 0
+fi
+
+# `openzca` is not in the mounted OpenClaw home. Restore it after a base-image
+# replacement, but do not reinstall it on images that already provide it.
 if command -v openzca >/dev/null 2>&1; then
-    echo "✓ openzca installed successfully"
-    openzca --version 2>&1 || true
+    echo "openzca is already available"
 else
-    echo "✗ openzca not found in PATH"
+    echo "Restoring openzca npm package..."
+    if command -v npm >/dev/null 2>&1; then
+        npm install -g openzca 2>&1 || echo "Warning: Failed to install openzca globally"
+    else
+        echo "Warning: npm not found, cannot restore openzca"
+    fi
 fi
 
-# Install Zalo plugins
+# Ensure the persisted Zalo plugin entries remain enabled. Plugin files are
+# preserved in agent_data; if either is absent, OpenClaw installs it again.
 ZALO_PLUGINS="@openclaw/zalo @openclaw/zalouser"
 for plugin in $ZALO_PLUGINS; do
     plugin_id=$(echo "$plugin" | sed 's/@openclaw\///')
-    
-    # Check if plugin is already enabled
-    if ! jq -e ".plugins.entries.\"$plugin_id\".enabled == true" "$CONFIG" >/dev/null 2>&1; then
-        echo "Installing plugin: $plugin"
+
+    if [ ! -d "$EXTENSIONS_PATH/$plugin_id" ]; then
+        echo "Restoring plugin: $plugin"
         if command -v openclaw >/dev/null 2>&1; then
             openclaw plugins install "$plugin" || echo "Warning: Failed to install $plugin"
         fi
-        
-        # Enable plugin in config
-        jq --arg pid "$plugin_id" '
-        .plugins.allow |= (. + [$pid] | unique) |
-        .plugins.entries[$pid] = {enabled: true}
-        ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-        echo "Enabled plugin: $plugin_id"
-    else
-        echo "Plugin already enabled: $plugin_id"
     fi
+
+    TMP=$(mktemp)
+    jq --arg pid "$plugin_id" '
+        .plugins.allow |= (. + [$pid] | unique) |
+        .plugins.entries[$pid] = ((.plugins.entries[$pid] // {}) + {enabled: true})
+    ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+    echo "Ensured plugin is enabled: $plugin_id"
 done

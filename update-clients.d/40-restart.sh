@@ -46,11 +46,14 @@ if [ "$RESTART_CONTAINERS" = true ]; then
 
         echo "Migrating client: $client"
         rm -f "$client_dir/.openclaw-migration-failed"
-        # The persistent plugin path is validated before OpenClaw runs. Install
-        # it in the one-off container first, then apply every pending migration
-        # (including audit-events-v2) with the new image.
+        # Restore any persisted Zalo setup before doctor validates plugins. The
+        # OpenClaw image upgrade removes global npm packages such as `openzca`,
+        # while the Zalo extension/config lives under agent_data.
+        # The module is a no-op for clients without an existing Zalo setup.
+        # The persistent message-listener plugin is also validated before
+        # OpenClaw applies every pending migration (including audit-events-v2).
         if (cd "$client_dir" && "${COMPOSE_CMD[@]}" run --rm --no-deps --entrypoint /bin/sh ai_agent -c \
-            '. /bootstrap/modules/plugins/openclaw-message-listener.sh && openclaw doctor --fix'); then
+            '. /bootstrap/modules/plugins/openclaw-message-listener.sh && . /bootstrap/modules/plugins/zalo.sh && openclaw doctor --fix'); then
             echo "  ✓ State database migrated"
         else
             echo "  ✗ Migration failed; this client will not be started automatically"

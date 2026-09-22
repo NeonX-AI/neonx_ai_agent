@@ -26,11 +26,14 @@ export SCRIPT_DIR
 . "$SCRIPT_DIR/modules/config/models.sh"
 
 # 5b. Chatbot mode (CHAT_BOT=true -> hide skills + stub KNOWLEDGE.md for speed)
-. "$SCRIPT_DIR/modules/config/chatbot.sh"
+# . "$SCRIPT_DIR/modules/config/chatbot.sh"
 
 # 6. Setup other plugins
 . "$SCRIPT_DIR/modules/plugins/telegram.sh"
-# . "$SCRIPT_DIR/modules/plugins/zalo.sh"
+# Restore Zalo only for clients that already have its persisted configuration.
+# The OpenClaw image is replaceable, so its globally installed `openzca` binary
+# must be restored whenever a Zalo-enabled client starts.
+. "$SCRIPT_DIR/modules/plugins/zalo.sh"
 # . "$SCRIPT_DIR/modules/plugins/codex.sh"
 # . "$SCRIPT_DIR/modules/plugins/codex-skills.sh"
 # . "$SCRIPT_DIR/modules/plugins/codex-provider.sh"
